@@ -1,0 +1,16 @@
+"./ti_msp_dl_config.o"
+"./startup_mspm0g350x_ticlang.o"
+"./main.o"
+"./Hardware/buzz/buzz.o"
+"./Hardware/control/control.o"
+"./Hardware/delay/delay.o"
+"./Hardware/encoder/encoder.o"
+"./Hardware/jy60/jy60.o"
+"./Hardware/line/line.o"
+"./Hardware/motor/motor.o"
+"./Hardware/oled/oled.o"
+"./Hardware/pid/pid.o"
+"./Hardware/uart/uart.o"
+-l"./device_linker.cmd"
+-ldevice.cmd.genlibs
+-llibc.a
