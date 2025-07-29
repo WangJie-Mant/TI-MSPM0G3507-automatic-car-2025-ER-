@@ -485,5 +485,6 @@ void GROUP1_IRQHandler(void) {
   {
     encoder_Update();
   }
+  default: break;
   }
 }
