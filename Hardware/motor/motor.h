@@ -3,14 +3,14 @@
 
 #include "ti_msp_dl_config.h"
 
-#define     AIN1_SET    DL_GPIO_writePins(MOTOR_AIN1_PORT, MOTOR_AIN1_PIN);
-#define     AIN1_RESET  DL_GPIO_clearPins(MOTOR_AIN1_PORT, MOTOR_AIN1_PIN);
-#define     AIN2_SET    DL_GPIO_writePins(MOTOR_AIN2_PORT, MOTOR_AIN2_PIN);
-#define     AIN2_RESET  DL_GPIO_clearPins(MOTOR_AIN2_PORT, MOTOR_AIN2_PIN);
-#define     BIN1_SET    DL_GPIO_writePins(MOTOR_BIN1_PORT, MOTOR_BIN1_PIN);
-#define     BIN1_RESET  DL_GPIO_clearPins(MOTOR_BIN1_PORT, MOTOR_BIN1_PIN);
-#define     BIN2_SET    DL_GPIO_writePins(MOTOR_BIN2_PORT, MOTOR_BIN2_PIN);
-#define     BIN2_RESET  DL_GPIO_clearPins(MOTOR_BIN2_PORT, MOTOR_BIN2_PIN);
+#define     AIN1_SET    DL_GPIO_writePins(MOTOR_PORT, MOTOR_AIN1_PIN)
+#define     AIN1_RESET  DL_GPIO_clearPins(MOTOR_PORT, MOTOR_AIN1_PIN)
+#define     AIN2_SET    DL_GPIO_writePins(MOTOR_PORT, MOTOR_AIN2_PIN)
+#define     AIN2_RESET  DL_GPIO_clearPins(MOTOR_PORT, MOTOR_AIN2_PIN)
+#define     BIN1_SET    DL_GPIO_writePins(MOTOR_PORT, MOTOR_BIN1_PIN)
+#define     BIN1_RESET  DL_GPIO_clearPins(MOTOR_PORT, MOTOR_BIN1_PIN)
+#define     BIN2_SET    DL_GPIO_writePins(MOTOR_PORT, MOTOR_BIN2_PIN)
+#define     BIN2_RESET  DL_GPIO_clearPins(MOTOR_PORT, MOTOR_BIN2_PIN)
 
 #define     PWM_MAX     7000
 #define     PWM_MIN     -7000

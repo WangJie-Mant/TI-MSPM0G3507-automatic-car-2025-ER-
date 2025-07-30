@@ -8,7 +8,7 @@
 #define ENCODER_RESOLUTION 13 // 编码器线数
 
 /* 经过倍频之后的总分辨率 */
-#define ENCODER_TOTAL_RESOLUTION (ENCODER_RESOLUTION * 2) /* 2倍频后的总分辨率 */
+#define ENCODER_TOTAL_RESOLUTION (ENCODER_RESOLUTION * 4) /* 4倍频后的总分辨率 - 修正为4倍频 */
 
 /* 减速电机减速比 */
 #define REDUCTION_RATIO 20

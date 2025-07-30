@@ -10,7 +10,9 @@
 "./Hardware/motor/motor.o"
 "./Hardware/oled/oled.o"
 "./Hardware/pid/pid.o"
+"./Hardware/pid/smooth.o"
 "./Hardware/uart/uart.o"
+"./Hardware/uart/uart_jy60.o"
 -l"./device_linker.cmd"
 -ldevice.cmd.genlibs
 -llibc.a

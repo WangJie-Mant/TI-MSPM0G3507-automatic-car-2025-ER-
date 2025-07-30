@@ -8,9 +8,8 @@ pid_t g_pid_turn_angle;
 pid_t g_pid_line;
 pid_t g_pid_straight;
 
-
-void pid_Init(pid_t *p, double kp, double ki, double kd, 
-double out_max, double pout_max, double iout_max, double dout_max)
+void pid_Init(pid_t *p, double kp, double ki, double kd,
+              double out_max, double pout_max, double iout_max, double dout_max)
 {
     /*根据添入的参数初始化指定的pid*/
     p->kp = kp;
@@ -76,25 +75,32 @@ void pid_Set_Params(pid_t *p, double kp, double ki, double kd)
     p->kd = kd;
 }
 
-
 /*
-* @retval       p->out
-*
-*
-*/
+ * @retval       p->out
+ *
+ *
+ */
 double pid_location_Calc(pid_t *p, double current)
 {
     /*位置环pid算法*/
     p->current = current;
-    
-    p->error = p->target - p->current;
+
+    // 应用软启动
+    double soft_target = soft_start(current, p->target);
+
+    // 计算误差
+    p->error = soft_target - p->current;
 
     p->integral += p->error;
     p->pout = p->kp * p->error;
     p->iout = p->ki * p->integral;
     p->dout = p->kd * (p->error - p->lasterror);
 
-    p->out = p->pout + p->iout + p->dout;
+    // 平滑输出
+    double raw_out = p->pout + p->iout + p->dout;
+    p->out = p->last_smoothed_target * (1.0 - FILTER_FACTOR) + raw_out * FILTER_FACTOR;
+    p->last_smoothed_target = p->out;
+
     p->lasterror = p->error;
     return p->out;
 }
@@ -102,8 +108,15 @@ double pid_location_Calc(pid_t *p, double current)
 double pid_speed_Calc(pid_t *p, double current)
 {
     /*速度环pid算法*/
-    p->current = current;
-    p->error = p->target - p->current;
+    // 对输入速度进行滤波
+    double filtered_current = filter_speed(p, current);
+    p->current = filtered_current;
+
+    // 对目标速度进行平滑处理
+    double smooth_target_speed = smooth_target(p, p->target);
+
+    // 计算误差
+    p->error = smooth_target_speed - p->current;
 
     if ((p->error < 0.5) && (p->error > -0.5))
     {
@@ -174,9 +187,10 @@ double pid_straight_Calc(pid_t *p, double current)
     {
         p->integral += p->error;
         p->integral = limit_abs(p->integral, 50.0);
-    } 
-    else {
-    p->integral = 0;
+    }
+    else
+    {
+        p->integral = 0;
     }
 
     p->pout = p->kp * p->error;
@@ -188,8 +202,6 @@ double pid_straight_Calc(pid_t *p, double current)
     p->lasterror = p->error;
     return p->out;
 }
-
-
 
 double limit_abs(double x, double limit)
 {

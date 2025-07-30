@@ -1,83 +1,152 @@
-#include "ti_msp_dl_config.h"
 #include "encoder.h"
 
-volatile int16_t encoder_Left_Count = 0;
-volatile int16_t encoder_Right_Count = 0;
+#include <stdio.h>
+#include "ti_msp_dl_config.h"
 
-void encoder_Update(void)
+// 定义了两个编码器的计数器，用于计算编码器的旋转圈数
+volatile int _encoder_l_count = 0, _encoder_r_count = 0;
+int i = 0;
+static void encoder_function(void)
 {
-    /*由外部中断调用的编码器读数函数*/
-    if (DL_GPIO_getEnabledInterruptStatus(ENCODER_PORT, ENCODER_LEFT_A_PIN)) // 左轮A相触发上升沿中断
+    // 处理左编码器A相中断,A相上升沿
+    // DL_GPIO_getEnabledInterruptStatus(ENCODER_PORT, ENCODER_Left_A_PIN)
+    volatile unsigned int interruptMask = ENCODER_PORT->CPU_INT.MIS;
+    volatile unsigned int state = ENCODER_PORT->DIN31_0;
+    volatile unsigned int clearMask = ENCODER_PORT->DIN31_0;
+    if (interruptMask & ENCODER_LEFT_A_PIN)
     {
-        if (ENCODER_LEFT_B_STATUS == 0) // B相低电平
-        {
-            encoder_Left_Count++;
-        }
-        else if (ENCODER_LEFT_B_STATUS == 1) // B相高电平
-        {
-            encoder_Left_Count--;
-        }
-        DL_GPIO_clearInterruptStatus(ENCODER_PORT, ENCODER_LEFT_A_PIN); // 清除中断
+        _encoder_l_count += (state & ENCODER_LEFT_B_PIN) ? -1 : 1;
+        clearMask |= ENCODER_LEFT_A_PIN;
     }
 
-    if (DL_GPIO_getEnabledInterruptStatus(ENCODER_PORT, ENCODER_RIGHT_A_PIN)) // 右轮A相触发上升沿中断
+    if (interruptMask & ENCODER_RIGHT_A_PIN)
     {
-        if (ENCODER_RIGHT_B_STATUS == 0)
+        _encoder_r_count += (state & ENCODER_RIGHT_B_PIN) ? -1 : 1;
+        clearMask |= ENCODER_RIGHT_A_PIN;
+    }
+
+    ENCODER_PORT->CPU_INT.ICLR |= clearMask;
+}
+
+// 处理中断，更新编码器计数
+static void encoder_function2(void)
+{
+    // 处理左编码器A相中断,A相上升沿
+    if (DL_GPIO_getEnabledInterruptStatus(ENCODER_PORT, ENCODER_LEFT_A_PIN))
+    {
+        if (DL_GPIO_readPins(ENCODER_PORT, ENCODER_LEFT_B_PIN) == 0) // B逻辑低
         {
-            encoder_Right_Count++;
+
+            _encoder_l_count++; // 计数增
         }
-        else if (ENCODER_RIGHT_B_STATUS == 1)
+        else // B逻辑高
         {
-            encoder_Right_Count--;
+            _encoder_l_count--; // 计数减
         }
+        // 清除A相的中断状态
+        DL_GPIO_clearInterruptStatus(ENCODER_PORT, ENCODER_LEFT_A_PIN);
+    }
+
+    ////处理左编码器B相中断,B相下降沿
+    //    if (DL_GPIO_getEnabledInterruptStatus(ENCODER_PORT, ENCODER_Left_B_PIN))
+    //    {
+    //         if(DL_GPIO_readPins(ENCODER_PORT,ENCODER_Left_A_PIN)==0)  //A逻辑低
+    //         {
+    //
+    //              _encoder_l_count++; //计数增
+    //         }
+    //         else
+    //         {
+    //               _encoder_l_count--; //计数减
+    //         }
+    //        // 清除B相的中断状态
+    //        DL_GPIO_clearInterruptStatus(ENCODER_PORT, ENCODER_Left_B_PIN);
+    //    }
+
+    // 处理右编码器A相中断,A相上升沿
+    if (DL_GPIO_getEnabledInterruptStatus(ENCODER_PORT, ENCODER_RIGHT_A_PIN))
+    {
+        if (DL_GPIO_readPins(ENCODER_PORT, ENCODER_RIGHT_B_PIN) == 0) // B逻辑低
+        {
+
+            _encoder_r_count++; // 计数增
+        }
+        else // B逻辑高
+        {
+            _encoder_r_count--; // 计数减
+        }
+        // 清除A相的中断状态
         DL_GPIO_clearInterruptStatus(ENCODER_PORT, ENCODER_RIGHT_A_PIN);
     }
 
-    if (DL_GPIO_getEnabledInterruptStatus(ENCODER_PORT, ENCODER_LEFT_B_PIN))
-    {
-        if (ENCODER_LEFT_A_STATUS == 0)
-        {
-            encoder_Left_Count++;
-        }
-        else if (ENCODER_LEFT_A_STATUS == 1)
-        {
-            encoder_Left_Count--;
-        }
-        DL_GPIO_clearInterruptStatus(ENCODER_PORT, ENCODER_LEFT_B_PIN);
-    }
+    ////处理右编码器B相中断,B相下降沿
+    //    if (DL_GPIO_getEnabledInterruptStatus(ENCODER_PORT, ENCODER_Right_B_PIN))
+    //    {
+    //         if(DL_GPIO_readPins(ENCODER_PORT,ENCODER_Right_A_PIN)==0)  //A逻辑低
+    //         {
+    //
+    //              _encoder_r_count++; //计数增
+    //         }
+    //         else
+    //         {
+    //               _encoder_r_count--; //计数减
+    //         }
+    //        // 清除B相的中断状态
+    //        DL_GPIO_clearInterruptStatus(ENCODER_PORT, ENCODER_Right_B_PIN);
+    //    }
+}
 
-    if (DL_GPIO_getEnabledInterruptStatus(ENCODER_PORT, ENCODER_RIGHT_B_PIN))
+/**
+ * @brief 处理中断组1的中断服务函数
+ *
+ * 该函数用于处理中断组1中的中断。根据中断组1中待处理的中断，确定中断源，并执行相应的处理函数。
+ * 不接受任何参数，也不返回任何值。
+ */
+void GROUP1_IRQHandler(void)
+{
+
+    // 确定中断源并进行相应的处理
+    switch (DL_Interrupt_getPendingGroup(DL_INTERRUPT_GROUP_1))
     {
-        if (ENCODER_RIGHT_A_STATUS == 0)
-        {
-            encoder_Right_Count++;
-        }
-        else if (ENCODER_RIGHT_A_STATUS == 1)
-        {
-            encoder_Right_Count--;
-        }
-        DL_GPIO_clearInterruptStatus(ENCODER_PORT, ENCODER_RIGHT_B_PIN);
+    case DL_INTERRUPT_GROUP1_IIDX_GPIOB: // 当中断源为编码器中断时
+    {
+        // 调用编码器中断处理函数
+        encoder_function2();
+    }
+    break;
+    default: // 对于其他中断源，不进行处理
+        break;
     }
 }
 
-int read_pluse(int motor_num)
+// 初始化编码器（可根据需要配置中断）
+void encoder_Init(void)
 {
-    int16_t pluse;
-    if (motor_num == 1) // 左轮
-    {
-        pluse = encoder_Left_Count;
-        encoder_Left_Count = 0;
-    }
-    else if (motor_num == 2)
-    {
-        pluse = encoder_Right_Count;
-        encoder_Right_Count = 0;
-    }
-    else
-    {
-        pluse = 0;
-        encoder_Left_Count = 0;
-        encoder_Right_Count = 0;
-    }
-    return pluse;
+    // 已在syscfg初始化中启用GPIO中断，无需额外操作
+}
+
+// 中断服务入口
+void encoder_IRQHandler(void)
+{
+    encoder_function2();
+}
+
+// 读取左编码器累计脉冲并清零
+int read_encoder_left(void)
+{
+    __disable_irq();  // 禁用中断，确保原子操作
+    int val = _encoder_l_count;
+    _encoder_l_count = 0;
+    __enable_irq();   // 重新启用中断
+    return val;
+}
+
+// 读取右编码器累计脉冲并清零
+int read_encoder_right(void)
+{
+    __disable_irq();  // 禁用中断，确保原子操作
+    int val = _encoder_r_count;
+    _encoder_r_count = 0;
+    __enable_irq();   // 重新启用中断
+    return val;
 }

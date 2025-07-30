@@ -56,12 +56,18 @@ double spin90_cm = 0;
 int count2 = 0;
 int count3 = 0;
 
-void TIMER_0_INST_IRQHandler(void) {
+void TIMER_0_INST_IRQHandler(void)
+{
   /*20ms周期的定时器中断，pid控制等等在此处进行*/
-  switch (DL_TimerA_getPendingInterrupt(TIMER_0_INST)) {
-  case DL_TIMER_IIDX_ZERO: {
-    g_unittime_motor1pluse = -read_pluse(1);
-    g_unittime_motor2pluse = read_pluse(2);
+  switch (DL_TimerA_getPendingInterrupt(TIMER_0_INST))
+  {
+  case DL_TIMER_IIDX_ZERO:
+  {
+    // 读取编码器脉冲计数并清零，添加原子操作保护
+    __disable_irq();
+    g_unittime_motor1pluse = read_encoder_left();
+    g_unittime_motor2pluse = read_encoder_right();
+    __enable_irq();
 
     g_sigma_motor1pluse += g_unittime_motor1pluse;
     g_sigma_motor2pluse += g_unittime_motor2pluse;
@@ -73,13 +79,17 @@ void TIMER_0_INST_IRQHandler(void) {
         (g_sigma_motor2pluse / (REDUCTION_RATIO * ENCODER_TOTAL_RESOLUTION)) *
         (WHEEL_D * 3.1416);
 
-    if (g_Line_Flag == 1) {
-      if (g_motor1_journey_cm >= g_ftarget_journey - 2 || detect_line()) {
+    if (g_Line_Flag == 1)
+    {
+      if (g_motor1_journey_cm >= g_ftarget_journey - 2 || detect_line())
+      {
         g_Straight_Flag = 1;
         g_Line_Flag = 0;
         g_Stop_Flag = 0;
         g_stop_count = 0;
-      } else if (g_Straight_Flag == 1) {
+      }
+      else if (g_Straight_Flag == 1)
+      {
         pid_Set_Target(&g_pid_turn_angle, 179.5);
         turn_angle_pid_control();
 
@@ -90,9 +100,11 @@ void TIMER_0_INST_IRQHandler(void) {
         motor_load_pwm(g_motor1_pwm, g_motor2_pwm);
 
         if (g_yaw_jy60 <= g_pid_turn_angle.target + 2 &&
-            g_yaw_jy60 >= g_pid_turn_angle.target - 2) {
+            g_yaw_jy60 >= g_pid_turn_angle.target - 2)
+        {
           count3++;
-          if (count3 >= 10) {
+          if (count3 >= 10)
+          {
             motor1_set_disable();
             motor2_set_disable();
             g_Angle_Flag = 0;
@@ -101,7 +113,9 @@ void TIMER_0_INST_IRQHandler(void) {
             count++;
           }
         }
-      } else {
+      }
+      else
+      {
         g_Stop_Flag = 1;
         g_stop_count = 0;
       }
@@ -128,18 +142,14 @@ void TIMER_0_INST_IRQHandler(void) {
         motor_load_pwm(g_motor1_pwm, g_motor2_pwm);
       }
     }
-    if (g_Gostraght == 1) {
+    if (g_Gostraght == 1)
+    {
       // 1. 持续进行PID控制，计算并加载PWM值，让小车行驶
       if (g_is_motor1_enabled == 1 ||
           g_is_motor2_enabled == 1) // 电机在使能状态下才进行控制处理
       {
         location_speed_control(); // 位置环速度环串级PID的输出是速度环输出的PWM值
         float angle_out = pid_straight_Calc(&g_pid_straight, g_yaw_jy60);
-        // 平衡左右轮脉冲，有助于保持直线
-        long pulse1;
-        pulse1 = (g_sigma_motor1pluse + g_sigma_motor2pluse) / 2;
-        g_sigma_motor1pluse = pulse1;
-        g_sigma_motor2pluse = pulse1;
         // 叠加角度环（直行环）的控制量
         g_motor1_pwm = g_speed1_outval + angle_out;
         g_motor2_pwm = g_speed2_outval - angle_out;
@@ -149,7 +159,8 @@ void TIMER_0_INST_IRQHandler(void) {
       }
 
       // 2. 判断是否到达目标位置
-      if (g_motor1_journey_cm >= g_ftarget_journey - 5) {
+      if (g_motor1_journey_cm >= g_ftarget_journey - 5)
+      {
         g_Gostraght = 0; // 退出直行模式
         g_Stop_Flag = 0; // 清除停止标志，为下一个动作做准备
         motor1_set_disable();
@@ -157,7 +168,8 @@ void TIMER_0_INST_IRQHandler(void) {
         count++; // 任务完成，count自增，主函数可以继续执行
       }
     }
-    if (g_Spin_Start_Flag == 1) {
+    if (g_Spin_Start_Flag == 1)
+    {
       if (g_is_motor1_enabled == 1 ||
           g_is_motor2_enabled == 1) // 电机在使能状态下才进行控制处理
       {
@@ -167,7 +179,8 @@ void TIMER_0_INST_IRQHandler(void) {
         motor_limit_pwm(&g_motor1_pwm, &g_motor2_pwm);
         motor_load_pwm(g_motor1_pwm, g_motor2_pwm);
         if ((spin90_cm - 0.1 < g_motor1_journey_cm) ||
-            (g_motor1_journey_cm > spin90_cm)) {
+            (g_motor1_journey_cm > spin90_cm))
+        {
           motor1_set_disable();
           motor2_set_disable();
           g_Spin_Start_Flag = 0;
@@ -176,9 +189,10 @@ void TIMER_0_INST_IRQHandler(void) {
         }
       }
     }
-    if (g_Angle_Flag == 1) {
-      motor1_set_enable(); // 使能电机控制PWM输出
-      motor1_set_enable(); // 使能电机2控制PWM输出
+    if (g_Angle_Flag == 1)
+    {
+      motor1_set_enable(); // 使能电机1控制PWM输出
+      motor2_set_enable(); // 使能电机2控制PWM输出
       if (g_is_motor1_enabled == 1 ||
           g_is_motor2_enabled == 1) // 电机在使能状态下才进行控制处理
       {
@@ -187,7 +201,8 @@ void TIMER_0_INST_IRQHandler(void) {
         g_motor2_pwm = g_speed4_outval;
         motor_limit_pwm(&g_motor1_pwm, &g_motor2_pwm);
         motor_load_pwm(g_motor1_pwm, g_motor2_pwm);
-        if (g_pid_turn_angle.target > 0) {
+        if (g_pid_turn_angle.target > 0)
+        {
           if (g_yaw_jy60 >=
               g_pid_turn_angle.target - 12) // 这里的角度误差可以调节
           {
@@ -199,14 +214,17 @@ void TIMER_0_INST_IRQHandler(void) {
             count++;
             // 转向完成后将标志位清零
           }
-        } else if (g_pid_turn_angle.target < 0) {
+        }
+        else if (g_pid_turn_angle.target < 0)
+        {
 
           if (g_yaw_jy60 <= g_pid_turn_angle.target + 2 &&
               g_yaw_jy60 >=
                   g_pid_turn_angle.target - 2) // 这里的角度误差可以调节
           {
             count2++;
-            if (count2 >= 10) {
+            if (count2 >= 10)
+            {
               motor1_set_disable();
               motor2_set_disable();
               g_Angle_Flag = 0;
@@ -227,7 +245,8 @@ void TIMER_0_INST_IRQHandler(void) {
   }
 }
 
-void car_stop(void) {
+void car_stop(void)
+{
   uint8_t g_Line_Flag = 0;
   uint8_t g_Spin_Start_Flag = 0;   // 转向开始标志位
   uint8_t g_Spin_Succeed_Flag = 0; // 转向结束标志位
@@ -237,7 +256,8 @@ void car_stop(void) {
   motor2_set_disable();
 }
 
-void car_go(int32_t distance_cm, double degree) {
+void car_go(int32_t distance_cm, double degree)
+{
   g_pid_straight.target = degree;
 
   double target_pluse;
@@ -264,7 +284,8 @@ void car_go(int32_t distance_cm, double degree) {
   motor2_set_enable();
 }
 
-void car_go_line(int32_t distance_cm) {
+void car_go_line(int32_t distance_cm)
+{
   double target_pluse;
 
   /* 设置对应标志位 */
@@ -290,7 +311,8 @@ void car_go_line(int32_t distance_cm) {
   motor2_set_enable();
 }
 
-void car_spin(spin_dir direction) {
+void car_spin(spin_dir direction)
+{
   double car_turn_pluse;
 
   g_Line_Flag = 0;
@@ -309,15 +331,20 @@ void car_spin(spin_dir direction) {
       0.25 * 3.1416 *
       LUN_JU; // 以车中心为圆心，小车两轮距离为直径，小车旋转90度即为圆的1/4
 
-  if (direction == left_90) {
+  if (direction == left_90)
+  {
     car_turn_pluse = (spin90_cm / (WHEEL_D * 3.142)) *
                      (REDUCTION_RATIO * ENCODER_TOTAL_RESOLUTION);
     car_turn_pluse = car_turn_pluse;
-  } else if (right_90) {
+  }
+  else if (right_90)
+  {
     car_turn_pluse = -(spin90_cm / (WHEEL_D * 3.142)) *
                      (REDUCTION_RATIO * ENCODER_TOTAL_RESOLUTION);
     car_turn_pluse = car_turn_pluse;
-  } else if (direction == back_180) {
+  }
+  else if (direction == back_180)
+  {
     car_turn_pluse = -(spin90_cm / (WHEEL_D * 3.142)) *
                      (REDUCTION_RATIO * ENCODER_TOTAL_RESOLUTION) * 2;
   }
@@ -329,7 +356,8 @@ void car_spin(spin_dir direction) {
   motor2_set_enable();
 }
 
-void car_spin_degree(double angle) {
+void car_spin_degree(double angle)
+{
   /* 设置对应标志位 */
   g_Line_Flag = 0;
   g_Angle_Flag = 1;
@@ -347,7 +375,8 @@ void car_spin_degree(double angle) {
   motor2_set_enable();
 }
 
-void location_speed_control(void) {
+void location_speed_control(void)
+{
   if (g_is_motor1_enabled == 1 ||
       g_is_motor2_enabled == 1) // 电机在使能状态下才进行控制处理
   {
@@ -371,7 +400,8 @@ void location_speed_control(void) {
   }
 }
 
-double location1_pid_control(void) {
+double location1_pid_control(void)
+{
   double cont_val = 0.0;
   int32_t actual_location;
 
@@ -384,7 +414,8 @@ double location1_pid_control(void) {
   return cont_val;
 }
 
-double speed1_pid_control(void) {
+double speed1_pid_control(void)
+{
   double cont_val = 0.0; // 当前控制值
   int32_t actual_speed;  // 车轮实际转速度,单位rpm(转/min)
 
@@ -397,7 +428,8 @@ double speed1_pid_control(void) {
   return cont_val;
 }
 
-double location2_pid_control(void) {
+double location2_pid_control(void)
+{
   double cont_val = 0.0;
   int32_t actual_location;
 
@@ -410,7 +442,8 @@ double location2_pid_control(void) {
   return cont_val;
 }
 
-double speed2_pid_control(void) {
+double speed2_pid_control(void)
+{
   double cont_val = 0.0; // 当前控制值
   int32_t actual_speed;  // 车轮实际转速度,单位rpm(转/min)
 
@@ -423,10 +456,13 @@ double speed2_pid_control(void) {
   return cont_val;
 }
 
-void turn_angle_speed_control(void) {
-  if (g_is_motor1_enabled || g_is_motor2_enabled) {
+void turn_angle_speed_control(void)
+{
+  if (g_is_motor1_enabled || g_is_motor2_enabled)
+  {
     g_turn_angle_control_count++;
-    if (g_turn_angle_control_count >= 2) {
+    if (g_turn_angle_control_count >= 2)
+    {
       g_turn_angle_control_count = 0;
       g_turn_outval = turn_angle_pid_control();
     }
@@ -438,7 +474,8 @@ void turn_angle_speed_control(void) {
   }
 }
 
-double turn_angle_pid_control(void) {
+double turn_angle_pid_control(void)
+{
   double cont_val = 0.0;
   int32_t actual_angle;
 
@@ -451,12 +488,14 @@ double turn_angle_pid_control(void) {
   return cont_val;
 }
 
-void line_speed_control(void) {
+void line_speed_control(void)
+{
   if (g_is_motor1_enabled == 1 ||
       g_is_motor2_enabled == 1) // 电机在使能状态下才进行控制处理
   {
     g_line_speed_control_count++; // 这个是巡线串级pid外环
-    if (g_line_speed_control_count >= 2) {
+    if (g_line_speed_control_count >= 2)
+    {
       g_line_speed_control_count = 0;
       g_turn_outval = line_pid_control();
     }
@@ -469,7 +508,8 @@ void line_speed_control(void) {
   }
 }
 
-double line_pid_control(void) {
+double line_pid_control(void)
+{
   double cont_val = 0.0;
   int32_t actual_speed;
 
@@ -477,14 +517,4 @@ double line_pid_control(void) {
   cont_val =
       line_pid_Calc(err * 2); // 放大补偿量，乘以2（可根据实际调试调整倍数）
   return cont_val;
-}
-
-void GROUP1_IRQHandler(void) {
-  switch (DL_Interrupt_getPendingGroup(DL_INTERRUPT_GROUP_1)) {
-  case ENCODER_INT_IIDX: // 编码器A相 gpio外部中断
-  {
-    encoder_Update();
-  }
-  default: break;
-  }
 }

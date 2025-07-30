@@ -42,25 +42,41 @@ void motor_limit_pwm(int *p_motor1_pwm,int *p_motor2_pwm)
 void motor1_set_enable(void)
 {
     g_is_motor1_enabled = 1;
-    DL_TimerA_startCounter(PWM_MOTOR_INST);
+    // 只要有任一电机需要启用就启动PWM定时器
+    if (g_is_motor1_enabled || g_is_motor2_enabled) {
+        DL_TimerA_startCounter(PWM_MOTOR_INST);
+    }
 }
 
 void motor1_set_disable(void)
 {
     g_is_motor1_enabled = 0;
-    DL_TimerA_stopCounter(PWM_MOTOR_INST);
+    // 只有当两个电机都禁用时才停止PWM定时器
+    if (!g_is_motor1_enabled && !g_is_motor2_enabled) {
+        DL_TimerA_stopCounter(PWM_MOTOR_INST);
+    }
+    // 设置电机1 PWM为0
+    DL_Timer_setCaptureCompareValue(PWM_MOTOR_INST, 0, DL_TIMER_CC_0_INDEX);
 }
 
 void motor2_set_enable(void)
 {
     g_is_motor2_enabled = 1;
-    DL_TimerA_startCounter(PWM_MOTOR_INST);
+    // 只要有任一电机需要启用就启动PWM定时器
+    if (g_is_motor1_enabled || g_is_motor2_enabled) {
+        DL_TimerA_startCounter(PWM_MOTOR_INST);
+    }
 }
 
 void motor2_set_disable(void)
 {
     g_is_motor2_enabled = 0;
-    DL_TimerA_stopCounter(PWM_MOTOR_INST);
+    // 只有当两个电机都禁用时才停止PWM定时器
+    if (!g_is_motor1_enabled && !g_is_motor2_enabled) {
+        DL_TimerA_stopCounter(PWM_MOTOR_INST);
+    }
+    // 设置电机2 PWM为0
+    DL_Timer_setCaptureCompareValue(PWM_MOTOR_INST, 0, DL_TIMER_CC_1_INDEX);
 }
 
 int find_abs(int p)

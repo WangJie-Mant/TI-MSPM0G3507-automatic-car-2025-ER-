@@ -2,6 +2,7 @@
 
 Hardware/control/control.o: ../Hardware/control/control.c \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/encoder/encoder.h \
+ C:/Users/Walnut/workspace_ccstheia/CAR-V2/main.h \
  ti_msp_dl_config.h \
  C:/ti/mspm0_sdk_2_05_00_05/source/ti/devices/msp/msp.h \
  C:/ti/mspm0_sdk_2_05_00_05/source/ti/devices/DeviceFamily.h \
@@ -76,7 +77,6 @@ Hardware/control/control.o: ../Hardware/control/control.c \
  C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/dl_wwdt.h \
  C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/m0p/dl_interrupt.h \
  C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/m0p/dl_systick.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/main.h \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/control/control.h \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/delay/delay.h \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/jy60/jy60.h \
@@ -87,6 +87,7 @@ Hardware/control/control.o: ../Hardware/control/control.c \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/uart/uart.h \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/buzz/buzz.h
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/encoder/encoder.h:
+C:/Users/Walnut/workspace_ccstheia/CAR-V2/main.h:
 ti_msp_dl_config.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/devices/msp/msp.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/devices/DeviceFamily.h:
@@ -161,7 +162,6 @@ C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/dl_vref.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/dl_wwdt.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/m0p/dl_interrupt.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/m0p/dl_systick.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/main.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/control/control.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/delay/delay.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/jy60/jy60.h:

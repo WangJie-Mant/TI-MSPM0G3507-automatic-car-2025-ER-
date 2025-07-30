@@ -47,142 +47,179 @@ int main(void)
     motor1_set_enable();
     motor2_set_enable();
 
-    pid_Init(&g_pid_speed1, MOTOR1_SPD_KP, MOTOR1_SPD_KI, MOTOR1_SPD_KD, 0,0,0,0);
+    pid_Init(&g_pid_speed1, MOTOR1_SPD_KP, MOTOR1_SPD_KI, MOTOR1_SPD_KD, 0, 0, 0, 0);
     pid_Init(&g_pid_speed2, MOTOR2_SPD_KP, MOTOR2_SPD_KI, MOTOR2_SPD_KD, 0, 0, 0, 0);
     pid_Init(&g_pid_location1, MOTOR1_LOC_KP, MOTOR1_LOC_KI, MOTOR1_LOC_KD, 0, 0, 0, 0);
-    pid_Init(&g_pid_location2, MOTOR2_LOC_KP, MOTOR2_LOC_KI, MOTOR2_LOC_KD, 0,0,0,0);
     pid_Init(&g_pid_location2, MOTOR2_LOC_KP, MOTOR2_LOC_KI, MOTOR2_LOC_KD, 0, 0, 0, 0);
     pid_Init(&g_pid_turn_angle, ANGLE_KP, ANGLE_KI, ANGLE_KD, 0, 0, 0, 0);
     pid_Init(&g_pid_line, LINE_KP, LINE_KI, LINE_KD, 0, 0, 0, 0);
     pid_Init(&g_pid_straight, STR_KP, STR_KI, STR_KD, 0, 0, 0, 0);
 
+    // 初始化巡线PID
+    line_pid_init();
+
     OLED_Init();
-    
+
+    for (int i = 0; i < 100000; i++)
+        ;
+
+    // 添加延时让OLED初始化完成
+    // for (volatile int i = 0; i < 100000; i++)
+    //     ;
+
     buzz_Init();
+    NVIC_ClearPendingIRQ(TIMER_0_INST_INT_IRQN);
+    NVIC_ClearPendingIRQ(UART1_INST_INT_IRQN);
+    NVIC_ClearPendingIRQ(UART_WIT_INST_INT_IRQN);
+    NVIC_ClearPendingIRQ(ENCODER_INT_IRQN);
+    NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
+    NVIC_EnableIRQ(UART1_INST_INT_IRQN);
+    NVIC_EnableIRQ(UART_WIT_INST_INT_IRQN);
+    NVIC_EnableIRQ(ENCODER_INT_IRQN);
 
     uint8_t key = 0;
     uint16_t target_angle = 0;
+    uint8_t oledbuff[50];
 
     /*test*/
+    // 设置电机1方向 - 正转
+    AIN1_SET;
+    AIN2_RESET;
+    // 设置电机2方向 - 正转
+    BIN1_SET;
+    BIN2_RESET;
+    
+    // 直接测试电机PWM输出
+    motor_load_pwm(3000, 3000);  // 给两个电机相同的PWM值
     // car_go(120, 0);
-    // car_spin_degree(120);
-
+    OLED_Clear();
     while (1)
     {
-    // if(g_Stop_Flag==0&&count==0){
-    //    Buzz(10000);
-    //    g_Stop_Flag=1;
-    //     car_go(95);
-    //  }
-    // if(g_Stop_Flag==0&&count==1){
-    //    Buzz(10000);
-    //    g_Stop_Flag=1;
-    //     car_go_line(122);
-    //		 detect_line();
-    //  }
-    //	if(g_Stop_Flag==0&&count==2)
-    // {
-    //  g_Stop_Flag=1;
-    //  Buzz(10000);
-    //  car_spin_degree(179.5);
-    //}
-    // if(g_Stop_Flag==0&&count==3)
-    // {
-    //	  Buzz(10000);
-    //	  g_Stop_Flag=1;
-    //		car_go(105);
-    // }
-    //  if(g_Stop_Flag==0&&count==4)
-    // {
-    //	  Buzz(10000);
-    //	  g_Stop_Flag=1;
-    //		car_go_line(125);
-    // }
+        // OLED_Clear();
 
-    //
-    // if(g_Stop_Flag==0&&count==0){
-    //    Buzz(10000);
-    //    g_Stop_Flag=1;
-    //     car_go(130);
-    //  }
-    // if(g_Stop_Flag==0&&count==1){
-    //    Buzz(10000);
-    //    g_Stop_Flag=1;
-    //     car_go_line(128);
-    //		 detect_line();
-    //  }
-    //	if(g_Stop_Flag==0&&count==2)
-    // {
-    //  g_Stop_Flag=1;
-    //  Buzz(10000);
-    //  car_spin_degree(-128.66);
-    //}
-    // if(g_Stop_Flag==0&&count==3)
-    // {
-    //	  Buzz(10000);
-    //	  g_Stop_Flag=1;
-    //		car_go(130);
-    // }
-    //  if(g_Stop_Flag==0&&count==4)
-    // {
-    //	  Buzz(10000);
-    //	  g_Stop_Flag=1;
-    //		car_go_line(125);
-    // }
-    //
-    // if (g_Stop_Flag == 0 && count == 0)
-    // {
-    //   Buzz(10000);
-    //   g_Stop_Flag = 1;
-    //   car_spin_degree(-35.66);
-    // }
-    // if (g_Stop_Flag == 0 && count == 1)
-    // {
-    //   Buzz(10000);
-    //   g_Stop_Flag = 1;
-    //   car_go(128);
-    // }
-    // if (g_Stop_Flag == 0 && count == 2)
-    // {
-    //   Buzz(10000);
-    //   g_Stop_Flag = 1;
-    //   car_go_line(128);
-    // }
-    // if (g_Stop_Flag == 0 && count == 3)
-    // {
-    //   g_Stop_Flag = 1;
-    //   Buzz(10000);
-    //   car_spin_degree(-179.5);
-    // }
-    // if (g_Stop_Flag == 0 && count == 4)
-    // {
-    //   Buzz(10000);
-    //   g_Stop_Flag = 1;
-    //   car_go(6);
-    // }
-    // if (g_Stop_Flag == 0 && count == 5)
-    // {
-    //   g_Stop_Flag = 1;
-    //   Buzz(10000);
-    //   car_spin_degree(-130.66);
-    // }
-    // if (g_Stop_Flag == 0 && count == 6)
-    // {
-    //   Buzz(10000);
-    //   g_Stop_Flag = 1;
-    //   car_go(130);
-    // }
-    // if (g_Stop_Flag == 0 && count == 7)
-    // {
-    //   Buzz(10000);
-    //   g_Stop_Flag = 1;
-    //   car_go_line(125);
-    // }
-        sprintf((char*)g_oledstring, "Yaw:%6.2f", g_yaw_jy60);
-        OLED_ShowString(0, 32, (char*) g_oledstring);
+        sprintf((char *)oledbuff, "motor1: %ld", g_sigma_motor1pluse);
+        OLED_ShowString(0, 16, oledbuff, 16, 1);
+        OLED_Refresh();
+
+        sprintf((char *)oledbuff, "motor2: %ld", g_sigma_motor2pluse);
+        OLED_ShowString(0, 32, oledbuff, 16, 1);
+        OLED_Refresh();
+
+        // OLED_ShowString(5, 5, (char*)oledbuff);
+
+        // if(g_Stop_Flag==0&&count==0){
+        //    Buzz(10000);
+        //    g_Stop_Flag=1;
+        //     car_go(95);
+        //  }
+        // if(g_Stop_Flag==0&&count==1){
+        //    Buzz(10000);
+        //    g_Stop_Flag=1;
+        //     car_go_line(122);
+        //		 detect_line();
+        //  }
+        //	if(g_Stop_Flag==0&&count==2)
+        // {
+        //  g_Stop_Flag=1;
+        //  Buzz(10000);
+        //  car_spin_degree(179.5);
+        //}
+        // if(g_Stop_Flag==0&&count==3)
+        // {
+        //	  Buzz(10000);
+        //	  g_Stop_Flag=1;
+        //		car_go(105);
+        // }
+        //  if(g_Stop_Flag==0&&count==4)
+        // {
+        //	  Buzz(10000);
+        //	  g_Stop_Flag=1;
+        //		car_go_line(125);
+        // }
+
+        //
+        // if(g_Stop_Flag==0&&count==0){
+        //    Buzz(10000);
+        //    g_Stop_Flag=1;
+        //     car_go(130);
+        //  }
+        // if(g_Stop_Flag==0&&count==1){
+        //    Buzz(10000);
+        //    g_Stop_Flag=1;
+        //     car_go_line(128);
+        //		 detect_line();
+        //  }
+        //	if(g_Stop_Flag==0&&count==2)
+        // {
+        //  g_Stop_Flag=1;
+        //  Buzz(10000);
+        //  car_spin_degree(-128.66);
+        //}
+        // if(g_Stop_Flag==0&&count==3)
+        // {
+        //	  Buzz(10000);
+        //	  g_Stop_Flag=1;
+        //		car_go(130);
+        // }
+        //  if(g_Stop_Flag==0&&count==4)
+        // {
+        //	  Buzz(10000);
+        //	  g_Stop_Flag=1;
+        //		car_go_line(125);
+        // }
+        //
+        // if (g_Stop_Flag == 0 && count == 0)
+        // {
+        //   Buzz(10000);
+        //   g_Stop_Flag = 1;
+        //   car_spin_degree(-35.66);
+        // }
+        // if (g_Stop_Flag == 0 && count == 1)
+        // {
+        //   Buzz(10000);
+        //   g_Stop_Flag = 1;
+        //   car_go(128);
+        // }
+        // if (g_Stop_Flag == 0 && count == 2)
+        // {
+        //   Buzz(10000);
+        //   g_Stop_Flag = 1;
+        //   car_go_line(128);
+        // }
+        // if (g_Stop_Flag == 0 && count == 3)
+        // {
+        //   g_Stop_Flag = 1;
+        //   Buzz(10000);
+        //   car_spin_degree(-179.5);
+        // }
+        // if (g_Stop_Flag == 0 && count == 4)
+        // {
+        //   Buzz(10000);
+        //   g_Stop_Flag = 1;
+        //   car_go(6);
+        // }
+        // if (g_Stop_Flag == 0 && count == 5)
+        // {
+        //   g_Stop_Flag = 1;
+        //   Buzz(10000);
+        //   car_spin_degree(-130.66);
+        // }
+        // if (g_Stop_Flag == 0 && count == 6)
+        // {
+        //   Buzz(10000);
+        //   g_Stop_Flag = 1;
+        //   car_go(130);
+        // }
+        // if (g_Stop_Flag == 0 && count == 7)
+        // {
+        //   Buzz(10000);
+        //   g_Stop_Flag = 1;
+        //   car_go_line(125);
+        // }
+        // sprintf((char*)g_oledstring, "Yaw:%6.2f", g_yaw_jy60);
+        // OLED_ShowString(0, 32, (char*) g_oledstring);
     }
 }
-
 
 // void SysTick_Handler(void)
 // {

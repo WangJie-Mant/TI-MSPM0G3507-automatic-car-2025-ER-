@@ -1,17 +1,14 @@
 #ifndef __ENCODER_H__
 #define __ENCODER_H__
 
-#include "ti_msp_dl_config.h"
+#include <stdint.h>
+// 初始化编码器硬件（可选）
+void encoder_Init(void);
+// 读取左编码器累计脉冲并清零
+int read_encoder_left(void);
+// 读取右编码器累计脉冲并清零
+int read_encoder_right(void);
+// 中断服务入口，由GROUP1_IRQHandler调用
+void encoder_IRQHandler(void);
 
-extern volatile int16_t encoder_Left_Count;
-extern volatile int16_t encoder_Right_Count;
-
-#define ENCODER_LEFT_B_STATUS DL_GPIO_readPins(ENCODER_PORT, ENCODER_LEFT_B_PIN) > 0 ? 1 : 0
-#define ENCODER_RIGHT_B_STATUS DL_GPIO_readPins(ENCODER_PORT, ENCODER_RIGHT_B_PIN) > 0 ? 1 : 0
-#define ENCODER_LEFT_A_STATUS DL_GPIO_readPins(ENCODER_PORT, ENCODER_LEFT_A_PIN) > 0 ? 1 : 0
-#define ENCODER_RIGHT_A_STATUS DL_GPIO_readPins(ENCODER_PORT, ENCODER_RIGHT_A_PIN) > 0 ? 1 : 0
-
-void encoder_Update(void);
-int read_pluse(int motor_num);
-
-#endif
+#endif // __ENCODER_H__
