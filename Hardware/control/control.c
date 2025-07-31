@@ -81,58 +81,42 @@ void TIMER_0_INST_IRQHandler(void)
 
     if (g_Line_Flag == 1)
     {
-      if (g_motor1_journey_cm >= g_ftarget_journey - 2)
+      int thres = 0;
+      if (g_motor1_journey_cm >= g_ftarget_journey - 2 || detect_line())
       {
-        // 循迹任务完成
-        g_Line_Flag = 0;     // 停止循迹
-        g_Stop_Flag = 1;     // 设置停止标志
-        g_Straight_Flag = 0; // 清除直行标志
-        g_stop_count = 0;
-        motor1_set_disable(); // 停止电机
-        motor2_set_disable();
-        count++; // 增加任务计数，允许主程序继续执行下一个任务
+        thres++;
+        if (thres > 5)
+        {
+          // 循迹任务完成
+          g_Line_Flag = 0;     // 停止循迹
+          g_Stop_Flag = 1;     // 设置停止标志
+          g_Straight_Flag = 0; // 清除直行标志
+          g_stop_count = 0;
+          motor1_set_disable(); // 停止电机
+          motor2_set_disable();
+          count++; // 增加任务计数，允许主程序继续执行下一个任务
+        }
       }
-      // else if (g_Straight_Flag == 1)
-      // {
-      //   pid_Set_Target(&g_pid_turn_angle, 179.5);
-      //   turn_angle_pid_control();
 
-      //   g_motor1_pwm = g_speed3_outval;
-      //   g_motor2_pwm = g_speed4_outval;
-
-      //   motor_limit_pwm(&g_motor1_pwm, &g_motor2_pwm);
-      //   motor_load_pwm(g_motor1_pwm, g_motor2_pwm);
-
-      //   if (g_yaw_jy60 <= g_pid_turn_angle.target + 2 &&
-      //       g_yaw_jy60 >= g_pid_turn_angle.target - 2)
-      //   {
-      //     count3++;
-      //     if (count3 >= 10)
-      //     {
-      //       motor1_set_disable();
-      //       motor2_set_disable();
-      //       g_Angle_Flag = 0;
-      //       g_Stop_Flag = 0;
-      //       count3 = 0;
-      //       count++;
-      //     }
-      //   }
-      // }
-      else
-      {
-        g_Stop_Flag = 1;
-        g_stop_count = 0;
-      }
       if (g_is_motor1_enabled == 1 ||
           g_is_motor2_enabled == 1) // 电机在使能状态下才进行控制处理
       {
+        thres = 0;
         location_speed_control();
         g_line_num = line_pid_control();
+        // if (g_line_num == 0)
+        // {
+        //   long pulse;
+        //   pulse = (g_sigma_motor1pluse + g_sigma_motor2pluse) / 2;
+        //   g_sigma_motor1pluse = pulse; // 可能有时候这里加上个补偿会更好
+        //   g_sigma_motor2pluse = pulse;
+        // }
 
         g_line_outval = g_line_num;
 
         g_motor1_pwm = g_speed1_outval + g_line_outval;
         g_motor2_pwm = g_speed2_outval - g_line_outval;
+
         motor_limit_pwm(&g_motor1_pwm, &g_motor2_pwm);
         motor_load_pwm(g_motor1_pwm, g_motor2_pwm);
       }
@@ -257,14 +241,12 @@ void TIMER_0_INST_IRQHandler(void)
 
 void car_stop(void)
 {
-  // 清除所有运动标志位
   g_Line_Flag = 0;         // 巡线标志位,0不巡线,1巡线
   g_Spin_Start_Flag = 0;   // 转向开始标志位
   g_Spin_Succeed_Flag = 0; // 转向结束标志位
   g_Turn_Flag = 0;         // 转向标志位
   g_Angle_Flag = 0;        // 角度环调试标志位
   g_Gostraght = 0;         // 直行标志位
-
   // 禁用电机
   motor1_set_disable();
   motor2_set_disable();
@@ -313,6 +295,8 @@ void car_go_line(int32_t distance_cm)
   g_sigma_motor1pluse = 0;
   g_sigma_motor2pluse = 0;
 
+  g_pid_line.integral = 0;
+  g_pid_line.lasterror = 0;
   g_ftarget_journey = distance_cm;
 
   target_pluse = (distance_cm / (WHEEL_D * 3.1416)) *
@@ -414,12 +398,13 @@ void location_speed_control(void)
     pid_Set_Target(&g_pid_speed1, g_location1_outval); // 每次都必须有位置环的值
     pid_Set_Target(&g_pid_speed2, g_location2_outval); // 每次都必须有位置环的值
 
-    g_speed1_outval = limit_abs(g_speed1_outval, 5000);
-    g_speed2_outval = limit_abs(g_speed2_outval, 5000);
-
     /* 速度环控制 */
     g_speed1_outval = speed1_pid_control(); // 要是电机转向不符合预期，就在这两句里取反数值
     g_speed2_outval = speed2_pid_control();
+
+    // 在PID计算后再进行限制，提高限制值以获得更大速度
+    g_speed1_outval = limit_abs(g_speed1_outval, 7000);
+    g_speed2_outval = limit_abs(g_speed2_outval, 7000);
   }
 }
 
@@ -547,7 +532,7 @@ double line_pid_control(void)
 
   // 使用灰度传感器巡线偏差作为PID输入
   int32_t err = line_err();
-  cont_val = line_pid_realize(err); // 基础PID控制，不放大
+  cont_val = pid_line_Calc(err); // 基础PID控制，移除额外的放大
 
   return cont_val;
 }

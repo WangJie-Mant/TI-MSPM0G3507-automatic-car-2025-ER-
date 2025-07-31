@@ -6,45 +6,33 @@
 #include <stdlib.h> // 为了使用 abs()
 #define limit_abs(x, limit) ((x) > (limit) ? (limit) : ((x) < -(limit) ? -(limit) : (x)))
 
-static float line_pid_integral = 0;
-static float line_pid_last_err = 0;
+static float g_pid_line_integral = 0;
+static float g_pid_line_last_err = 0;
 static int32_t g_line_last_err = 0;
 
-// 灰度寻迹PID控制函数 - 基础版本
-float line_pid_realize(int err)
+void line_init(void)
 {
-  float p, i, d, out;
+  pid_Init(&g_pid_line, LINE_KP, LINE_KI, LINE_KD, 0, 0, 0, 0);
+}
 
-  p = LINE_KP * err;
+double pid_line_Calc(int error)
+{
+  g_pid_line.error = error;
+  g_pid_line.pout = g_pid_line.kp * g_pid_line.error;
+  g_pid_line.integral += g_pid_line.error;
+  g_pid_line.integral = limit_abs(g_pid_line.integral, 3500); // 32版本中这个限幅放在了计算pid输出下面，其实是完全没有用到的。如果ti调试有问题，试试注释这一句
 
-  // 基础积分控制
-  if (abs(err) < 20)
-  { // 误差小于20时，积分开始累积
+  g_pid_line.iout = g_pid_line.ki * g_pid_line.integral;
+  g_pid_line.dout = g_pid_line.kd * (g_pid_line.error - g_pid_line.lasterror);
 
-    line_pid_integral += err;
-  }
+  g_pid_line.out = g_pid_line.pout + g_pid_line.iout + g_pid_line.dout;
 
-  else if (abs(err) >= 20)
-  { // 误差大于等于20时，清零积分
-    line_pid_integral = 0;
-  }
+  // 限制PID输出，防止调整幅度过大
+  g_pid_line.out = limit_abs(g_pid_line.out, 1200); // 适中的限制，避免过大转向
 
-  i = LINE_KI * line_pid_integral;
-  d = LINE_KD * (err - line_pid_last_err);
+  g_pid_line.lasterror = g_pid_line.error;
 
-  out = p + i + d;
-  line_pid_last_err = err;
-
-  // 积分限幅，防止积分过大
-  if (line_pid_integral > 3500)
-    line_pid_integral = 3500;
-  if (line_pid_integral < -3500)
-    line_pid_integral = -3500;
-
-  // 输出限幅，防止输出过大
-  out = limit_abs(out, 1000);
-
-  return out;
+  return g_pid_line.out;
 }
 
 /**
@@ -55,11 +43,11 @@ float line_pid_realize(int err)
 int32_t line_err(void)
 {
   // 灰度寻迹加权平均法，权重按物理位置分布，间隔0.5cm，中心为0
+  /*返回偏移量，单位mm（放大1000倍）*/
   int sensor_val[8];
-  float sensor_pos[8] = {1.75, 1.25, 0.75, 0.25, -0.25, -0.75, -1.25, -1.75}; // 单位cm，中心为0
+  float sensor_weight[8] = {-1.75, -1.25, -0.75, -0.25, 0.25, 0.75, 1.25, 1.75};
   float sum = 0, weight = 0;
 
-  // 灰度传感器编号：1~8，左到右
   sensor_val[0] = HW1;
   sensor_val[1] = HW2;
   sensor_val[2] = HW3;
@@ -71,21 +59,16 @@ int32_t line_err(void)
 
   for (int i = 0; i < 8; i++)
   {
-    sum += sensor_val[i] * sensor_pos[i];
+    sum += sensor_val[i] * sensor_weight[i];
     weight += sensor_val[i];
   }
-
   if (weight == 0)
   {
-    // 简单处理：丢线时返回上次的误差值，保持方向
     return 0;
   }
   else
   {
-    // 正常情况下计算加权平均误差
-    int32_t current_err = (int32_t)(sum / weight * 1000);
-    g_line_last_err = current_err; // 保存当前有效的误差，用于丢线时参考
-    return current_err;
+    return (int32_t)(sum / weight * 750); // 适中的放大倍数：500倍，兼顾响应和稳定
   }
 }
 

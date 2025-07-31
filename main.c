@@ -53,6 +53,7 @@ int main(void)
     DL_TimerA_startCounter(PWM_MOTOR_INST);
     motor1_set_enable();
     motor2_set_enable();
+    line_init();
 
     pid_Init(&g_pid_speed1, MOTOR1_SPD_KP, MOTOR1_SPD_KI, MOTOR1_SPD_KD, 0, 0, 0,
              0);
@@ -89,6 +90,7 @@ int main(void)
     uint8_t key = 0;
     uint16_t target_angle = 0;
     uint8_t oledbuff[50];
+    static uint32_t display_counter = 0; // 显示更新计数器
 
     // DL_GPIO_setPins(MOTOR_PORT, MOTOR_AIN1_PIN);
     // DL_GPIO_clearPins(MOTOR_PORT, MOTOR_AIN2_PIN);
@@ -96,29 +98,35 @@ int main(void)
     // DL_GPIO_setPins(MOTOR_PORT, MOTOR_BIN1_PIN);
     // DL_GPIO_clearPins(MOTOR_PORT, MOTOR_BIN2_PIN);
     // 电机测试配置 - 不要手动设置方向，让motor_load_pwm函数处理
-    // motor_load_pwm(3000, 3000); // 正值：motor1正转，motor2正转
+    // motor_load_pwm(300, 300); // 正值：motor1正转，motor2正转
     OLED_Clear();
 
     // 测试STM32移植的巡线功能
-    car_go_line(100); // 巡线前进100cm
-    // car_spin(left_90);  // 测试左转90度
+    // car_go_line(100); // 巡线前进100cm
+    car_spin(left_90); // 测试左转90度
     //  car_spin_degree(90);
     //  car_go(100, 0);
 
     while (1)
     {
-        sprintf((char *)oledbuff, "line: %d%d%d%d%d%d%d%d", HW1, HW2, HW3, HW4, HW5, HW6, HW7, HW8);
-        OLED_ShowString(0, 0, (char *)oledbuff, 16, 1);
-        OLED_Refresh();
-        sprintf((char *)oledbuff, "err: %ld", g_line_num);
-        OLED_ShowString(0, 16, (char *)oledbuff, 16, 1);
-        OLED_Refresh();
-        sprintf((char *)oledbuff, "PWM1:%d", g_motor1_pwm);
-        OLED_ShowString(0, 32, (char *)oledbuff, 16, 1);
-        OLED_Refresh();
-        sprintf((char *)oledbuff, "PWM2:%d", g_motor2_pwm);
-        OLED_ShowString(0, 48, (char *)oledbuff, 16, 1);
-        OLED_Refresh();
+        
+            display_counter = 0;
+
+            sprintf((char *)oledbuff, "line: %d%d%d%d%d%d%d%d", HW1, HW2, HW3, HW4, HW5, HW6, HW7, HW8);
+            OLED_ShowString(0, 0, (char *)oledbuff, 16, 1);
+            OLED_Refresh();
+
+            sprintf((char *)oledbuff, "err: %ld", g_line_num);
+            OLED_ShowString(0, 16, (char *)oledbuff, 16, 1);
+            OLED_Refresh();
+
+            sprintf((char *)oledbuff, "m1:%.2f", g_motor1_journey_cm);
+            OLED_ShowString(0, 32, (char *)oledbuff, 16, 1);
+            OLED_Refresh();
+
+            sprintf((char *)oledbuff, "m2:%.2f", g_motor2_journey_cm);
+            OLED_ShowString(0, 48, (char *)oledbuff, 16, 1);
+            OLED_Refresh();
 
         // sprintf((char *)oledbuff, "SPD1:%.0f SPD2:%.0f", g_speed1_outval, g_speed2_outval);
         // OLED_ShowString(0, 48, oledbuff, 16, 1);

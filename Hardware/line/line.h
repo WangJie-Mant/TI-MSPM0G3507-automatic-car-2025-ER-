@@ -6,9 +6,9 @@
 #include <stdint.h>
 
 // PID参数 - 优化后的参数
-#define LINE_KP 2.8f // 适当增加P，提高响应速度
-#define LINE_KI 0.0f // 引入少量I，消除静差
-#define LINE_KD 0.0f // 引入D，抑制震荡，提高稳定性
+#define LINE_KP 2.8f // 适度降低P值，减少抽搐
+#define LINE_KI 0.02f // 保持无积分，避免累积误差
+#define LINE_KD 0.1f // 加入少量微分，抑制震荡
 
 // 传感器宏定义保持原有
 #define HW1 (DL_GPIO_readPins(INF_INF1_PORT, INF_INF1_PIN) > 0 ? 1 : 0)
@@ -22,6 +22,8 @@
 
 // 从STM32工程移植的函数声明
 float line_pid_realize(int err); // STM32工程中的主要PID函数
+double pid_line_Calc(int error);
+void line_init(void);
 int32_t line_err(void);
 int32_t yaw_err0(void);
 int32_t yaw_err180(void);

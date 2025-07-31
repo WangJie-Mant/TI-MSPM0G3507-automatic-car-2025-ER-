@@ -17,7 +17,7 @@
 #define SPEED_PID_PERIOD 20 // 这个要看定时器3的中断周期
 
 /* 小车速度限制 */
-#define TARGET_SPEED_MAX 200 // 单位rpm,临时提高以测试单轮性能
+#define TARGET_SPEED_MAX 3000 // 单位rpm,进一步提高以获得更大的基础速度
 
 /* 轮胎直径cm */
 #define WHEEL_D 4.75 // 单位cm,实际测量为准

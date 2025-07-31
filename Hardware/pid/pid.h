@@ -9,22 +9,22 @@
 
 // 电机1使用参数
 /*位置环相关参数*/
-#define MOTOR1_LOC_KP 0.3
-#define MOTOR1_LOC_KI 0.0
+#define MOTOR1_LOC_KP 3.0  // 进一步提高位置环P参数，增强基础速度
+#define MOTOR1_LOC_KI 0.02 // 适当增加积分项
 #define MOTOR1_LOC_KD 0.0
 /*速度环相关参数*/
-#define MOTOR1_SPD_KP 6.0
-#define MOTOR1_SPD_KI 0.0       //8.5
+#define MOTOR1_SPD_KP 12.0 // 进一步提高P参数，增大驱动力
+#define MOTOR1_SPD_KI 1.0  // 提高I参数，增强低速驱动能力
 #define MOTOR1_SPD_KD 0.0
 
 // 电机2使用参数
 /*位置环相关参数*/
-#define MOTOR2_LOC_KP 0.3
-#define MOTOR2_LOC_KI 0.0
+#define MOTOR2_LOC_KP 3.0  // 保持与motor1一致
+#define MOTOR2_LOC_KI 0.02 // 保持与motor1一致
 #define MOTOR2_LOC_KD 0.0
 /*速度环相关参数*/
-#define MOTOR2_SPD_KP 6.0
-#define MOTOR2_SPD_KI 8.5
+#define MOTOR2_SPD_KP 12.0 // 保持与motor1一致
+#define MOTOR2_SPD_KI 1.0  // 保持与motor1一致
 #define MOTOR2_SPD_KD 0.0
 
 // 角度环相关参数
@@ -59,7 +59,7 @@ typedef struct
     double last_smoothed_target; // 上一次的平滑目标值
     double filtered_speed;       // 经过滤波的速度值
     double last_speed;           // 上一次的速度值
-    int direction;            // 运动方向: 1=正向, -1=反向, 0=停止
+    int direction;               // 运动方向: 1=正向, -1=反向, 0=停止
 } pid_t;
 
 extern pid_t g_pid_speed1, g_pid_speed2;
