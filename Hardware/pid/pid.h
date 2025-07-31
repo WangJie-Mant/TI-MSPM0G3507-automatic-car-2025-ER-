@@ -14,7 +14,7 @@
 #define MOTOR1_LOC_KD 0.0
 /*速度环相关参数*/
 #define MOTOR1_SPD_KP 6.0
-#define MOTOR1_SPD_KI 8.5
+#define MOTOR1_SPD_KI 0.0       //8.5
 #define MOTOR1_SPD_KD 0.0
 
 // 电机2使用参数

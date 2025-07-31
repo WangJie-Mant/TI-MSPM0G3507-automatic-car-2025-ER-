@@ -414,9 +414,11 @@ void location_speed_control(void)
     pid_Set_Target(&g_pid_speed1, g_location1_outval); // 每次都必须有位置环的值
     pid_Set_Target(&g_pid_speed2, g_location2_outval); // 每次都必须有位置环的值
 
+    g_speed1_outval = limit_abs(g_speed1_outval, 5000);
+    g_speed2_outval = limit_abs(g_speed2_outval, 5000);
+
     /* 速度环控制 */
-    g_speed1_outval =
-        speed1_pid_control(); // 要是电机转向不符合预期，就在这两句里取反数值
+    g_speed1_outval = speed1_pid_control(); // 要是电机转向不符合预期，就在这两句里取反数值
     g_speed2_outval = speed2_pid_control();
   }
 }

@@ -20,11 +20,10 @@ float line_pid_realize(int err)
   // 基础积分控制
   if (abs(err) < 20)
   { // 误差小于20时，积分开始累积
-    if (abs(line_pid_last_err) < 20)
-    { // 上次误差小于20时，才累积
-      line_pid_integral += err;
-    }
+
+    line_pid_integral += err;
   }
+
   else if (abs(err) >= 20)
   { // 误差大于等于20时，清零积分
     line_pid_integral = 0;
