@@ -43,6 +43,7 @@ extern uint8_t g_Spin_Start_Flag;   // 转向开始标志位
 extern uint8_t g_Spin_Succeed_Flag; // 转向结束标志位
 extern uint8_t g_Turn_Flag;         // 转向标志位
 extern uint8_t g_Angle_Flag;        // 角度环调试标志位
+extern int32_t g_line_num;
 
 /* 小车旋转选项 */
 typedef enum

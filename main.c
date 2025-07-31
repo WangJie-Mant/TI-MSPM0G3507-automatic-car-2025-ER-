@@ -107,11 +107,10 @@ int main(void)
 
     while (1)
     {
-        // 1. 将所有要显示的内容写入缓冲区
         sprintf((char *)oledbuff, "line: %d%d%d%d%d%d%d%d", HW1, HW2, HW3, HW4, HW5, HW6, HW7, HW8);
         OLED_ShowString(0, 0, (char *)oledbuff, 16, 1);
         OLED_Refresh();
-        sprintf((char *)oledbuff, "err: %ld", line_err());
+        sprintf((char *)oledbuff, "err: %ld", g_line_num);
         OLED_ShowString(0, 16, (char *)oledbuff, 16, 1);
         OLED_Refresh();
         sprintf((char *)oledbuff, "PWM1:%d", g_motor1_pwm);
