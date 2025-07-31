@@ -43,10 +43,9 @@ float line_pid_realize(int err)
     line_pid_integral = -3500;
 
   // 输出限幅，防止输出过大
-  out = limit_abs(out, 6000);
+  out = limit_abs(out, 4000);
 
   return out;
-}
 }
 
 /**

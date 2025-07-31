@@ -126,13 +126,13 @@ void TIMER_0_INST_IRQHandler(void)
       if (g_is_motor1_enabled == 1 ||
           g_is_motor2_enabled == 1) // 电机在使能状态下才进行控制处理
       {
-        // 使用STM32工程的巡线速度控制 - 提供基础速度+巡线补偿
-        line_speed_control();
+        location_speed_control();
+        g_line_num = line_pid_control();
 
-        // 巡线PWM输出 - 使用speed3和speed4（巡线专用输出）
-        g_motor1_pwm = g_speed3_outval;
-        g_motor2_pwm = g_speed4_outval;
+        g_line_outval = g_line_num;
 
+        g_motor1_pwm = g_speed1_outval + g_line_outval;
+        g_motor2_pwm = g_speed2_outval - g_line_outval;
         motor_limit_pwm(&g_motor1_pwm, &g_motor2_pwm);
         motor_load_pwm(g_motor1_pwm, g_motor2_pwm);
       }
@@ -526,9 +526,9 @@ void line_speed_control(void)
       g_turn_outval = line_pid_control();
     }
 
-    // 这个的800是基础的速度加减g_turn_outval实现差速
-    pid_Set_Target(&g_pid_speed1, 800 - g_turn_outval);
-    pid_Set_Target(&g_pid_speed2, 800 + g_turn_outval);
+    // 这个的1200是基础的速度加减g_turn_outval实现差速
+    pid_Set_Target(&g_pid_speed1, 1200 - g_turn_outval);
+    pid_Set_Target(&g_pid_speed2, 1200 + g_turn_outval);
     g_speed3_outval = speed1_pid_control();
     g_speed4_outval = speed2_pid_control();
   }

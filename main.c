@@ -100,43 +100,26 @@ int main(void)
     OLED_Clear();
 
     // 测试STM32移植的巡线功能
-    //car_go_line(100); // 巡线前进100cm
-    car_spin(left_90);  // 测试左转90度
-    // car_spin_degree(90);
-    // car_go(100, 0);
+    car_go_line(100); // 巡线前进100cm
+    // car_spin(left_90);  // 测试左转90度
+    //  car_spin_degree(90);
+    //  car_go(100, 0);
 
     while (1)
     {
-        // sprintf((char *)oledbuff, "P1:%.0f P2:%.0f", (double)g_sigma_motor1pluse, (double)g_sigma_motor2pluse);
-        // OLED_ShowString(0, 0, oledbuff, 16, 1);
-        // OLED_Refresh();
-
-        // sprintf((char *)oledbuff, "UP1:%d UP2:%d", g_unittime_motor1pluse, g_unittime_motor2pluse);
-        // OLED_ShowString(0, 16, oledbuff, 16, 1);
-        // OLED_Refresh();
-
-        // sprintf((char *)oledbuff, "PWM1:%d PWM2:%d", g_motor1_pwm, g_motor2_pwm);
-        // OLED_ShowString(0, 32, oledbuff, 16, 1);
-        // OLED_Refresh();
-
+        // 1. 将所有要显示的内容写入缓冲区
         sprintf((char *)oledbuff, "line: %d%d%d%d%d%d%d%d", HW1, HW2, HW3, HW4, HW5, HW6, HW7, HW8);
         OLED_ShowString(0, 0, (char *)oledbuff, 16, 1);
         OLED_Refresh();
-
         sprintf((char *)oledbuff, "err: %ld", line_err());
         OLED_ShowString(0, 16, (char *)oledbuff, 16, 1);
         OLED_Refresh();
-
         sprintf((char *)oledbuff, "PWM1:%d", g_motor1_pwm);
         OLED_ShowString(0, 32, (char *)oledbuff, 16, 1);
         OLED_Refresh();
-
-        sprintf((char*)oledbuff, "PWM2:%d", g_motor2_pwm);
-        OLED_ShowString(0, 48, (char*)oledbuff, 16, 1);
+        sprintf((char *)oledbuff, "PWM2:%d", g_motor2_pwm);
+        OLED_ShowString(0, 48, (char *)oledbuff, 16, 1);
         OLED_Refresh();
-
-
-
 
         // sprintf((char *)oledbuff, "SPD1:%.0f SPD2:%.0f", g_speed1_outval, g_speed2_outval);
         // OLED_ShowString(0, 48, oledbuff, 16, 1);
