@@ -13,7 +13,12 @@
 #include "pid.h"
 #include "uart.h"
 #include "buzz.h"
+#include "key.h"
+#include "menu.h"
+#include "task.h"
 
 extern int count;
+extern int circle_num;
+extern int turn_num;
 
 #endif

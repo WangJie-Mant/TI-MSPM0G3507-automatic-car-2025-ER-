@@ -1,6 +1,6 @@
 # FIXED
 
-main.o: ../main.c \
+main.o: ../main.c ../main.h \
  ti_msp_dl_config.h \
  C:/ti/mspm0_sdk_2_05_00_05/source/ti/devices/msp/msp.h \
  C:/ti/mspm0_sdk_2_05_00_05/source/ti/devices/DeviceFamily.h \
@@ -75,7 +75,6 @@ main.o: ../main.c \
  C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/dl_wwdt.h \
  C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/m0p/dl_interrupt.h \
  C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/m0p/dl_systick.h \
- ../main.h \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/control/control.h \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/main.h \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/delay/delay.h \
@@ -86,7 +85,11 @@ main.o: ../main.c \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/oled/oled.h \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/pid/pid.h \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/uart/uart.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/buzz/buzz.h
+ C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/buzz/buzz.h \
+ C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/key/key.h \
+ C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/menu/menu.h \
+ C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/task/task.h
+../main.h:
 ti_msp_dl_config.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/devices/msp/msp.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/devices/DeviceFamily.h:
@@ -161,7 +164,6 @@ C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/dl_vref.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/dl_wwdt.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/m0p/dl_interrupt.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/m0p/dl_systick.h:
-../main.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/control/control.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/main.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/delay/delay.h:
@@ -173,3 +175,6 @@ C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/oled/oled.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/pid/pid.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/uart/uart.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/buzz/buzz.h:
+C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/key/key.h:
+C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/menu/menu.h:
+C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/task/task.h:

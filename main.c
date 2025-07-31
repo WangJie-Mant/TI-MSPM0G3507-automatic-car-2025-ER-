@@ -30,18 +30,18 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ti_msp_dl_config.h"
 #include "main.h"
 #include "stdio.h"
+#include "ti_msp_dl_config.h"
 
 uint8_t g_oledstring[50];
 
 extern uint8_t g_usart2_receivedata;
 uint8_t g_mode = 0;
 int count = 0;
-int N = 0;
+int circle_num = 0;
 int turn_num = 0; // 旋转次数
-uint8_t first_long;
+// uint8_t first_long;
 
 int main(void)
 {
@@ -50,20 +50,24 @@ int main(void)
     // BIN1_RESET;
     //  BIN2_SET;
     SYSCFG_DL_init();
-     DL_TimerA_startCounter(PWM_MOTOR_INST);
+    DL_TimerA_startCounter(PWM_MOTOR_INST);
     motor1_set_enable();
     motor2_set_enable();
 
-    pid_Init(&g_pid_speed1, MOTOR1_SPD_KP, MOTOR1_SPD_KI, MOTOR1_SPD_KD, 0, 0, 0, 0);
-    pid_Init(&g_pid_speed2, MOTOR2_SPD_KP, MOTOR2_SPD_KI, MOTOR2_SPD_KD, 0, 0, 0, 0);
-    pid_Init(&g_pid_location1, MOTOR1_LOC_KP, MOTOR1_LOC_KI, MOTOR1_LOC_KD, 0, 0, 0, 0);
-    pid_Init(&g_pid_location2, MOTOR2_LOC_KP, MOTOR2_LOC_KI, MOTOR2_LOC_KD, 0, 0, 0, 0);
+    pid_Init(&g_pid_speed1, MOTOR1_SPD_KP, MOTOR1_SPD_KI, MOTOR1_SPD_KD, 0, 0, 0,
+             0);
+    pid_Init(&g_pid_speed2, MOTOR2_SPD_KP, MOTOR2_SPD_KI, MOTOR2_SPD_KD, 0, 0, 0,
+             0);
+    pid_Init(&g_pid_location1, MOTOR1_LOC_KP, MOTOR1_LOC_KI, MOTOR1_LOC_KD, 0, 0,
+             0, 0);
+    pid_Init(&g_pid_location2, MOTOR2_LOC_KP, MOTOR2_LOC_KI, MOTOR2_LOC_KD, 0, 0,
+             0, 0);
     pid_Init(&g_pid_turn_angle, ANGLE_KP, ANGLE_KI, ANGLE_KD, 0, 0, 0, 0);
     pid_Init(&g_pid_line, LINE_KP, LINE_KI, LINE_KD, 0, 0, 0, 0);
     pid_Init(&g_pid_straight, STR_KP, STR_KI, STR_KD, 0, 0, 0, 0);
 
-    // 初始化巡线PID
-    line_pid_init();
+    // 设置正方形轨迹巡线圈数 (可以根据需要修改)
+    circle_num = 1; // 默认走1圈正方形
 
     OLED_Init();
 
@@ -73,12 +77,12 @@ int main(void)
     buzz_Init();
     NVIC_ClearPendingIRQ(TIMER_0_INST_INT_IRQN);
     NVIC_ClearPendingIRQ(UART1_INST_INT_IRQN);
-    NVIC_ClearPendingIRQ(UART_WIT_INST_INT_IRQN);
+
     NVIC_ClearPendingIRQ(ENCODER_GPIOA_INT_IRQN);
     NVIC_ClearPendingIRQ(ENCODER_GPIOB_INT_IRQN);
     NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
     NVIC_EnableIRQ(UART1_INST_INT_IRQN);
-    NVIC_EnableIRQ(UART_WIT_INST_INT_IRQN);
+
     NVIC_EnableIRQ(ENCODER_GPIOA_INT_IRQN);
     NVIC_EnableIRQ(ENCODER_GPIOB_INT_IRQN);
 
@@ -92,22 +96,55 @@ int main(void)
     // DL_GPIO_setPins(MOTOR_PORT, MOTOR_BIN1_PIN);
     // DL_GPIO_clearPins(MOTOR_PORT, MOTOR_BIN2_PIN);
     // 电机测试配置 - 不要手动设置方向，让motor_load_pwm函数处理
-    motor_load_pwm(3000, 3000); // 正值：motor1正转，motor2正转
+    // motor_load_pwm(3000, 3000); // 正值：motor1正转，motor2正转
     OLED_Clear();
+
+    // 测试STM32移植的巡线功能
+    //car_go_line(100); // 巡线前进100cm
+    car_spin(left_90);  // 测试左转90度
+    // car_spin_degree(90);
+    // car_go(100, 0);
 
     while (1)
     {
-        sprintf((char *)oledbuff, "motor1: %ld", g_sigma_motor1pluse);
-        OLED_ShowString(0, 0, oledbuff, 16, 1);
+        // sprintf((char *)oledbuff, "P1:%.0f P2:%.0f", (double)g_sigma_motor1pluse, (double)g_sigma_motor2pluse);
+        // OLED_ShowString(0, 0, oledbuff, 16, 1);
+        // OLED_Refresh();
+
+        // sprintf((char *)oledbuff, "UP1:%d UP2:%d", g_unittime_motor1pluse, g_unittime_motor2pluse);
+        // OLED_ShowString(0, 16, oledbuff, 16, 1);
+        // OLED_Refresh();
+
+        // sprintf((char *)oledbuff, "PWM1:%d PWM2:%d", g_motor1_pwm, g_motor2_pwm);
+        // OLED_ShowString(0, 32, oledbuff, 16, 1);
+        // OLED_Refresh();
+
+        sprintf((char *)oledbuff, "line: %d%d%d%d%d%d%d%d", HW1, HW2, HW3, HW4, HW5, HW6, HW7, HW8);
+        OLED_ShowString(0, 0, (char *)oledbuff, 16, 1);
         OLED_Refresh();
 
-        sprintf((char *)oledbuff, "motor2: %ld", g_sigma_motor2pluse);
-        OLED_ShowString(0, 16, oledbuff, 16, 1);
+        sprintf((char *)oledbuff, "err: %ld", line_err());
+        OLED_ShowString(0, 16, (char *)oledbuff, 16, 1);
         OLED_Refresh();
+
+        sprintf((char *)oledbuff, "PWM1:%d", g_motor1_pwm);
+        OLED_ShowString(0, 32, (char *)oledbuff, 16, 1);
+        OLED_Refresh();
+
+        sprintf((char*)oledbuff, "PWM2:%d", g_motor2_pwm);
+        OLED_ShowString(0, 48, (char*)oledbuff, 16, 1);
+        OLED_Refresh();
+
+
+
+
+        // sprintf((char *)oledbuff, "SPD1:%.0f SPD2:%.0f", g_speed1_outval, g_speed2_outval);
+        // OLED_ShowString(0, 48, oledbuff, 16, 1);
+        // OLED_Refresh();
 
         // // 显示循迹传感器状态
-        // sprintf((char *)oledbuff, "Line:%d%d%d%d%d%d%d%d", HW1, HW2, HW3, HW4, HW5, HW6, HW7, HW8);
-        // OLED_ShowString(0, 32, oledbuff, 16, 1);
+        // sprintf((char *)oledbuff, "Line:%d%d%d%d%d%d%d%d", HW1, HW2, HW3, HW4,
+        // HW5, HW6, HW7, HW8); OLED_ShowString(0, 32, oledbuff, 16, 1);
         // OLED_Refresh();
 
         // // 显示循迹误差

@@ -130,9 +130,12 @@ Hardware/control \
 Hardware/delay \
 Hardware/encoder \
 Hardware/jy60 \
+Hardware/key \
 Hardware/line \
+Hardware/menu \
 Hardware/motor \
 Hardware/oled \
 Hardware/pid \
+Hardware/task \
 Hardware/uart \
 

@@ -8,7 +8,7 @@
 #define ENCODER_RESOLUTION 13 // 编码器线数
 
 /* 经过倍频之后的总分辨率 */
-#define ENCODER_TOTAL_RESOLUTION (ENCODER_RESOLUTION * 2) /* 4倍频后的总分辨率 - 修正为4倍频 */
+#define ENCODER_TOTAL_RESOLUTION (ENCODER_RESOLUTION) /* 4倍频后的总分辨率 - 修正为4倍频 */
 
 /* 减速电机减速比 */
 #define REDUCTION_RATIO 20
@@ -17,13 +17,13 @@
 #define SPEED_PID_PERIOD 20 // 这个要看定时器3的中断周期
 
 /* 小车速度限制 */
-#define TARGET_SPEED_MAX 100 // 单位rpm,如果实际使用位置环时两轮误差较大可以降低速度来改善，160rpm，1s能跑的最大距离53cm
+#define TARGET_SPEED_MAX 200 // 单位rpm,临时提高以测试单轮性能
 
 /* 轮胎直径cm */
-#define WHEEL_D 4.8 // 单位cm,实际测量为准
+#define WHEEL_D 4.75 // 单位cm,实际测量为准
 
 /* 小车两轮距离 */
-#define LUN_JU 14.4
+#define LUN_JU 14.3
 // 单位cm,实际测量为准
 
 /* 外部变量声明 */
@@ -69,7 +69,13 @@ double line_pid_control(void);
 void line_speed_control(void);
 void car_spin_degree(double angle);
 void car_go_line(int32_t distance_cm);
+
+/* 从STM32工程移植的脱轨恢复函数 */
+double calculate_target_yaw(void);
+void handle_off_track_recovery(void);
+
 extern uint8_t g_Gostraght;
+extern uint8_t g_OffTrack_Flag; // 脱轨恢复标志位
 extern double spin90_cm;
 
 #endif

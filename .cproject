@@ -52,8 +52,13 @@
                                     <listOptionValue value="${PROJECT_ROOT}/Hardware/MSPM0"/>
                                     <listOptionValue value="${PROJECT_ROOT}/Hardware/MPU6050"/>
                                     <listOptionValue value="${PROJECT_ROOT}/Hardware/BNO08X_UART_RVC"/>
+                                    <listOptionValue value="${PROJECT_ROOT}/Hardware/menu"/>
+                                    <listOptionValue value="${PROJECT_ROOT}/Hardware/key"/>
                                     <listOptionValue value="${PROJECT_ROOT}/Hardware/delay"/>
                                     <listOptionValue value="${PROJECT_ROOT}/Hardware/line"/>
+                                    <listOptionValue value="${PROJECT_ROOT}/Hardware/menu"/>
+                                    <listOptionValue value="${PROJECT_ROOT}/Hardware/key"/>
+                                    <listOptionValue value="${PROJECT_ROOT}/Hardware/task"/>
                                     <listOptionValue value="${PROJECT_ROOT}/Hardware/ole2d"/>
                                     <listOptionValue value="${PROJECT_ROOT}/Hardware/encoder"/>
                                 </option>

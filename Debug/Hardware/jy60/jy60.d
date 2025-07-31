@@ -85,7 +85,10 @@ Hardware/jy60/jy60.o: ../Hardware/jy60/jy60.c ../Hardware/jy60/jy60.h \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/oled/oled.h \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/pid/pid.h \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/uart/uart.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/buzz/buzz.h
+ C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/buzz/buzz.h \
+ C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/key/key.h \
+ C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/menu/menu.h \
+ C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/task/task.h
 ../Hardware/jy60/jy60.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/main.h:
 ti_msp_dl_config.h:
@@ -172,3 +175,6 @@ C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/oled/oled.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/pid/pid.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/uart/uart.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/buzz/buzz.h:
+C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/key/key.h:
+C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/menu/menu.h:
+C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/task/task.h:

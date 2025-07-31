@@ -1,6 +1,7 @@
 #include "encoder.h"
 #include "main.h"
 #include "ti_msp_dl_config.h"
+#include <math.h> // 为了使用 fabs() 函数
 
 long g_sigma_motor1pluse = 0;
 long g_sigma_motor2pluse = 0;     // 电机2累计脉冲
@@ -41,9 +42,10 @@ uint8_t g_Spin_Succeed_Flag = 0; // 转向结束标志位
 uint8_t g_Turn_Flag = 0;         // 转向标志位,好像没用到
 uint8_t g_Angle_Flag = 0;        // 角度环调试标志位
 uint8_t g_Gostraght = 0;
-int32_t g_line_num = 0;   // 灰度巡线偏移量
-double g_line_outval = 0; // 巡线差值量
-int32_t g_yaw_err = 0;    // 角度偏移量
+uint8_t g_OffTrack_Flag = 0; // 脱轨恢复标志位 - 从STM32工程移植
+int32_t g_line_num = 0;      // 灰度巡线偏移量
+double g_line_outval = 0;    // 巡线差值量
+int32_t g_yaw_err = 0;       // 角度偏移量
 uint8_t g_Straight_Flag = 0;
 
 extern uint8_t g_mode; // 运行哪个功能
@@ -65,8 +67,8 @@ void TIMER_0_INST_IRQHandler(void)
   {
     // // 读取编码器脉冲计数并清零，添加原子操作保护
 
-    g_unittime_motor1pluse = read_encoder_left();
-    g_unittime_motor2pluse = read_encoder_right();
+    g_unittime_motor1pluse = -read_encoder_left();
+    g_unittime_motor2pluse = -read_encoder_right();
 
     g_sigma_motor1pluse += g_unittime_motor1pluse;
     g_sigma_motor2pluse += g_unittime_motor2pluse;
@@ -80,39 +82,54 @@ void TIMER_0_INST_IRQHandler(void)
 
     if (g_Line_Flag == 1)
     {
-      if (g_motor1_journey_cm >= g_ftarget_journey - 2 || detect_line())
+      // 从STM32工程移植的脱轨检测逻辑
+      if (is_completely_off_track() && g_OffTrack_Flag == 0)
       {
-        g_Straight_Flag = 1;
-        g_Line_Flag = 0;
-        g_Stop_Flag = 0;
+        // 脱轨，停止并切换到恢复模式
+        g_Line_Flag = 0;      // 停止循迹
+        g_OffTrack_Flag = 1;  // 启动脱轨恢复
+        motor1_set_disable(); // 停止电机
+        motor2_set_disable();
+        // 注意：不增加count，因为我们要恢复到循迹状态
+      }
+
+      if (g_motor1_journey_cm >= g_ftarget_journey - 2)
+      {
+        // 循迹任务完成
+        g_Line_Flag = 0;     // 停止循迹
+        g_Stop_Flag = 1;     // 设置停止标志
+        g_Straight_Flag = 0; // 清除直行标志
         g_stop_count = 0;
+        motor1_set_disable(); // 停止电机
+        motor2_set_disable();
+        count++; // 增加任务计数，允许主程序继续执行下一个任务
       }
-      else if (g_Straight_Flag == 1)
-      {
-        pid_Set_Target(&g_pid_turn_angle, 179.5);
-        turn_angle_pid_control();
+      // else if (g_Straight_Flag == 1)
+      // {
+      //   pid_Set_Target(&g_pid_turn_angle, 179.5);
+      //   turn_angle_pid_control();
 
-        g_motor1_pwm = g_speed3_outval;
-        g_motor2_pwm = g_speed4_outval;
+      //   g_motor1_pwm = g_speed3_outval;
+      //   g_motor2_pwm = g_speed4_outval;
 
-        motor_limit_pwm(&g_motor1_pwm, &g_motor2_pwm);
-        motor_load_pwm(g_motor1_pwm, g_motor2_pwm);
+      //   motor_limit_pwm(&g_motor1_pwm, &g_motor2_pwm);
+      //   motor_load_pwm(g_motor1_pwm, g_motor2_pwm);
 
-        if (g_yaw_jy60 <= g_pid_turn_angle.target + 2 &&
-            g_yaw_jy60 >= g_pid_turn_angle.target - 2)
-        {
-          count3++;
-          if (count3 >= 10)
-          {
-            motor1_set_disable();
-            motor2_set_disable();
-            g_Angle_Flag = 0;
-            g_Stop_Flag = 0;
-            count3 = 0;
-            count++;
-          }
-        }
-      }
+      //   if (g_yaw_jy60 <= g_pid_turn_angle.target + 2 &&
+      //       g_yaw_jy60 >= g_pid_turn_angle.target - 2)
+      //   {
+      //     count3++;
+      //     if (count3 >= 10)
+      //     {
+      //       motor1_set_disable();
+      //       motor2_set_disable();
+      //       g_Angle_Flag = 0;
+      //       g_Stop_Flag = 0;
+      //       count3 = 0;
+      //       count++;
+      //     }
+      //   }
+      // }
       else
       {
         g_Stop_Flag = 1;
@@ -121,21 +138,12 @@ void TIMER_0_INST_IRQHandler(void)
       if (g_is_motor1_enabled == 1 ||
           g_is_motor2_enabled == 1) // 电机在使能状态下才进行控制处理
       {
-        location_speed_control(); // 位置环速度环串级PID的输出是速度环输出的PWM值
-        g_line_num = line_pid_control();
-        if (g_line_num ==
-            0) // 每次回到线上需要补偿的时候，都将两个电机的累计脉冲数取平均值，这个也会有在转向后帮助回到线上的效果
-        {
-          long pulse;
-          pulse = (g_sigma_motor1pluse + g_sigma_motor2pluse) / 2;
-          g_sigma_motor1pluse = pulse; // 可能有时候这里加上个补偿会更好
-          g_sigma_motor2pluse = pulse;
-        }
-        // 这个是灰度传感器的巡线补偿
-        g_line_outval =
-            g_line_num; // g_line_num得在PWM的重装载值一半左右才会有明显的效果
-        g_motor1_pwm = g_speed1_outval - g_line_outval;
-        g_motor2_pwm = g_speed2_outval + g_line_outval;
+        // 使用STM32工程的巡线速度控制 - 提供基础速度+巡线补偿
+        line_speed_control();
+
+        // 巡线PWM输出 - 使用speed3和speed4（巡线专用输出）
+        g_motor1_pwm = g_speed3_outval;
+        g_motor2_pwm = g_speed4_outval;
 
         motor_limit_pwm(&g_motor1_pwm, &g_motor2_pwm);
         motor_load_pwm(g_motor1_pwm, g_motor2_pwm);
@@ -148,10 +156,10 @@ void TIMER_0_INST_IRQHandler(void)
           g_is_motor2_enabled == 1) // 电机在使能状态下才进行控制处理
       {
         location_speed_control(); // 位置环速度环串级PID的输出是速度环输出的PWM值
-        float angle_out = pid_straight_Calc(&g_pid_straight, g_yaw_jy60);
+        //float angle_out = pid_straight_Calc(&g_pid_straight, g_yaw_jy60);
         // 叠加角度环（直行环）的控制量
-        g_motor1_pwm = g_speed1_outval + angle_out;
-        g_motor2_pwm = g_speed2_outval - angle_out;
+        g_motor1_pwm = g_speed1_outval;
+        g_motor2_pwm = g_speed2_outval;
 
         motor_limit_pwm(&g_motor1_pwm, &g_motor2_pwm);
         motor_load_pwm(g_motor1_pwm, g_motor2_pwm);
@@ -177,8 +185,21 @@ void TIMER_0_INST_IRQHandler(void)
         g_motor2_pwm = g_speed2_outval;
         motor_limit_pwm(&g_motor1_pwm, &g_motor2_pwm);
         motor_load_pwm(g_motor1_pwm, g_motor2_pwm);
-        if ((spin90_cm - 0.1 < g_motor1_journey_cm) ||
-            (g_motor1_journey_cm > spin90_cm))
+        // 修正停止条件：使用脉冲数判断，更精确
+        double target_pulse = fabs(g_pid_location1.target);
+        if ((fabs(g_sigma_motor1pluse) >= target_pulse - 10) &&
+            (fabs(g_sigma_motor2pluse) >= target_pulse - 10))
+        {
+          motor1_set_disable();
+          motor2_set_disable();
+          g_Spin_Start_Flag = 0;
+          g_Stop_Flag = 0;
+          count++;
+        }
+
+        // 安全停止：防止无限旋转（超过目标值太多时强制停止）
+        if ((fabs(g_sigma_motor1pluse) > target_pulse + 50) ||
+            (fabs(g_sigma_motor2pluse) > target_pulse + 50))
         {
           motor1_set_disable();
           motor2_set_disable();
@@ -234,26 +255,36 @@ void TIMER_0_INST_IRQHandler(void)
             // 转向完成后将标志位清零
           }
         }
-      
       }
-    DL_TimerA_clearInterruptStatus(TIMER_0_INST, DL_TIMERA_IIDX_ZERO);
-        break;
+
+      // 脱轨恢复处理 - 从STM32工程移植
+      if (g_OffTrack_Flag == 1)
+      {
+        handle_off_track_recovery();
+      }
+
+      DL_TimerA_clearInterruptStatus(TIMER_0_INST, DL_TIMERA_IIDX_ZERO);
+      break;
     }
-    }
+  }
   default:
     break;
-  
   }
 }
 // }
 
 void car_stop(void)
 {
-  uint8_t g_Line_Flag = 0;
-  uint8_t g_Spin_Start_Flag = 0;   // 转向开始标志位
-  uint8_t g_Spin_Succeed_Flag = 0; // 转向结束标志位
-  uint8_t g_Turn_Flag = 0;         // 转向标志位,好像没用到
-  uint8_t g_Angle_Flag = 0;        // 角度环调试标志位
+  // 清除所有运动标志位 - 从STM32工程移植
+  g_Line_Flag = 0;         // 巡线标志位,0不巡线,1巡线
+  g_Spin_Start_Flag = 0;   // 转向开始标志位
+  g_Spin_Succeed_Flag = 0; // 转向结束标志位
+  g_Turn_Flag = 0;         // 转向标志位
+  g_Angle_Flag = 0;        // 角度环调试标志位
+  g_Gostraght = 0;         // 直行标志位
+  g_OffTrack_Flag = 0;     // 脱轨恢复标志位
+
+  // 禁用电机
   motor1_set_disable();
   motor2_set_disable();
 }
@@ -328,22 +359,29 @@ void car_spin(spin_dir direction)
   g_sigma_motor1pluse = 0;
   g_sigma_motor2pluse = 0;
 
+  // 重置PID状态，避免积分累积
+  g_pid_location1.integral = 0;
+  g_pid_location1.lasterror = 0;
+  g_pid_location2.integral = 0;
+  g_pid_location2.lasterror = 0;
+  g_pid_speed1.integral = 0;
+  g_pid_speed1.lasterror = 0;
+  g_pid_speed2.integral = 0;
+  g_pid_speed2.lasterror = 0;
+
   /* 自旋90度的距离 */
   spin90_cm =
-      0.25 * 3.1416 *
-      LUN_JU; // 以车中心为圆心，小车两轮距离为直径，小车旋转90度即为圆的1/4
+      0.25 * 3.1416 * LUN_JU; // 以车中心为圆心，小车两轮距离为直径，小车旋转90度即为圆的1/4
 
   if (direction == left_90)
   {
     car_turn_pluse = (spin90_cm / (WHEEL_D * 3.142)) *
                      (REDUCTION_RATIO * ENCODER_TOTAL_RESOLUTION);
-    car_turn_pluse = car_turn_pluse;
   }
-  else if (right_90)
+  else if (direction == right_90)
   {
     car_turn_pluse = -(spin90_cm / (WHEEL_D * 3.142)) *
                      (REDUCTION_RATIO * ENCODER_TOTAL_RESOLUTION);
-    car_turn_pluse = car_turn_pluse;
   }
   else if (direction == back_180)
   {
@@ -351,8 +389,8 @@ void car_spin(spin_dir direction)
                      (REDUCTION_RATIO * ENCODER_TOTAL_RESOLUTION) * 2;
   }
 
-  pid_Set_Target(&g_pid_location1, -car_turn_pluse);
-  pid_Set_Target(&g_pid_location2, car_turn_pluse);
+  pid_Set_Target(&g_pid_location1, car_turn_pluse);  // 左轮正转用负目标
+  pid_Set_Target(&g_pid_location2, -car_turn_pluse); // 右轮反转用正目标
 
   motor1_set_enable();
   motor2_set_enable();
@@ -490,6 +528,11 @@ double turn_angle_pid_control(void)
   return cont_val;
 }
 
+/**
+ * @brief       巡线速度串级PID实现，通过巡线实现差速转弯 - 从STM32工程移植
+ * @param       无
+ * @retval      无
+ */
 void line_speed_control(void)
 {
   if (g_is_motor1_enabled == 1 ||
@@ -502,21 +545,122 @@ void line_speed_control(void)
       g_turn_outval = line_pid_control();
     }
 
-    // 这个的100是基础的速度加减g_turn_outval实现差速
-    pid_Set_Target(&g_pid_speed1, 100 - g_turn_outval);
-    pid_Set_Target(&g_pid_speed2, 100 + g_turn_outval);
+    // 这个的1500是基础的速度加减g_turn_outval实现差速
+    pid_Set_Target(&g_pid_speed1, 1500 - g_turn_outval);
+    pid_Set_Target(&g_pid_speed2, 1500 + g_turn_outval);
     g_speed3_outval = speed1_pid_control();
     g_speed4_outval = speed2_pid_control();
   }
 }
 
+/**
+ * @brief       巡线环控制 - 从STM32工程移植
+ * @param       无
+ * @retval      巡线环的输出值，实际上是两个轮子的差速值
+ */
 double line_pid_control(void)
 {
-  double cont_val = 0.0;
-  int32_t actual_speed;
+  double cont_val = 0.0; // 当前控制值
 
+  // 使用灰度传感器巡线偏差作为PID输入，提升拐弯能力
   int32_t err = line_err();
-  cont_val =
-      line_pid_Calc(err * 2); // 放大补偿量，乘以2（可根据实际调试调整倍数）
+  cont_val = line_pid_realize(err * 2); // 放大补偿量，乘以2（可根据实际调试调整倍数）
+
+  // 对于急弯搜索状态，进一步放大输出以确保足够的转向力度
+  int search_status = get_search_status();
+  if (search_status == 2)
+  {                  // 摆动搜索状态
+    cont_val *= 1.2; // 在摆动搜索时再增加20%的输出
+  }
+
   return cont_val;
+}
+
+/**
+ * @brief       计算目标朝向角度（0度或180度，选择最近的） - 从STM32工程移植
+ * @retval      目标角度值
+ */
+double calculate_target_yaw(void)
+{
+  double current_yaw = g_yaw_jy60;
+  double target_0 = 0.0f;
+  double target_180 = 180.0f;
+
+  // 计算到0度和180度的角度差（考虑角度环绕）
+  double diff_to_0 = fabs(current_yaw - target_0);
+  if (diff_to_0 > 180)
+    diff_to_0 = 360 - diff_to_0;
+
+  double diff_to_180 = fabs(current_yaw - target_180);
+  if (diff_to_180 > 180)
+    diff_to_180 = 360 - diff_to_180;
+
+  // 选择最近的目标角度
+  return (diff_to_0 <= diff_to_180) ? target_0 : target_180;
+}
+
+/**
+ * @brief       处理脱轨恢复 - 从STM32工程移植
+ * @note        当检测到完全脱轨时，停止前进并调整朝向到0度或180度
+ */
+void handle_off_track_recovery(void)
+{
+  static uint8_t recovery_phase = 0; // 0=刚开始, 1=正在转向, 2=完成
+  static double target_yaw = 0;
+  static int stable_counter = 0;
+
+  switch (recovery_phase)
+  {
+  case 0: // 初始化恢复过程
+    // 停止所有运动
+    motor1_set_disable();
+    motor2_set_disable();
+
+    // 计算目标朝向
+    target_yaw = calculate_target_yaw();
+
+    // 清除累计脉冲
+    g_sigma_motor1pluse = 0;
+    g_sigma_motor2pluse = 0;
+
+    // 启动角度控制
+    g_Angle_Flag = 1;
+    pid_Set_Target(&g_pid_turn_angle, target_yaw);
+
+    recovery_phase = 1;
+    stable_counter = 0;
+    break;
+
+  case 1: // 正在转向到目标角度
+    // 角度控制逻辑已经在主循环中处理
+    // 检查是否到达目标角度
+    double angle_error = fabs(g_yaw_jy60 - target_yaw);
+    if (angle_error > 180)
+      angle_error = 360 - angle_error; // 处理角度环绕
+
+    if (angle_error < 5.0f)
+    { // 角度误差小于5度
+      stable_counter++;
+      if (stable_counter > 25)
+      { // 稳定0.5秒
+        recovery_phase = 2;
+      }
+    }
+    else
+    {
+      stable_counter = 0;
+    }
+    break;
+
+  case 2: // 完成恢复
+    // 停止角度控制
+    g_Angle_Flag = 0;
+    motor1_set_disable();
+    motor2_set_disable();
+
+    g_OffTrack_Flag = 0;
+    recovery_phase = 0;
+    count++; // 让主程序继续执行下一步
+    break;
+  }
 }

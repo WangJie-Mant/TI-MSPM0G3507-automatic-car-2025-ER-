@@ -109,12 +109,17 @@ void GROUP1_IRQHandler(void)
     // 确定中断源并进行相应的处理
     switch (DL_Interrupt_getPendingGroup(DL_INTERRUPT_GROUP_1))
     {
-    case DL_INTERRUPT_GROUP1_IIDX_GPIOB: // 当中断源为编码器中断时
+    case DL_INTERRUPT_GROUP1_IIDX_GPIOB: // 当中断源为GPIOB编码器中断时
     {
         // 调用编码器中断处理函数
         encoder_function2();
+        break;
     }
-    break;
+    case DL_INTERRUPT_GROUP1_IIDX_GPIOA: // 当中断源为GPIOA编码器中断时
+    {
+        encoder_function2();
+        break;
+    }
     default: // 对于其他中断源，不进行处理
         break;
     }
