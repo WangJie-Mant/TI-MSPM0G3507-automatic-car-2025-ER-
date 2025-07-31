@@ -43,7 +43,7 @@ float line_pid_realize(int err)
     line_pid_integral = -3500;
 
   // 输出限幅，防止输出过大
-  out = limit_abs(out, 4000);
+  out = limit_abs(out, 1000);
 
   return out;
 }
@@ -79,7 +79,7 @@ int32_t line_err(void)
   if (weight == 0)
   {
     // 简单处理：丢线时返回上次的误差值，保持方向
-    return g_line_last_err;
+    return 0;
   }
   else
   {

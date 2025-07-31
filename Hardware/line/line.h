@@ -6,9 +6,9 @@
 #include <stdint.h>
 
 // PID参数 - 优化后的参数
-#define LINE_KP 3.5f // 适当增加P，提高响应速度
+#define LINE_KP 2.8f  // 适当增加P，提高响应速度
 #define LINE_KI 0.01f // 引入少量I，消除静差
-#define LINE_KD 1.5f // 引入D，抑制震荡，提高稳定性
+#define LINE_KD 0.0f  // 引入D，抑制震荡，提高稳定性
 
 // 传感器宏定义保持原有
 #define HW1 (DL_GPIO_readPins(INF_INF1_PORT, INF_INF1_PIN) > 0 ? 1 : 0)
