@@ -61,6 +61,7 @@
     "*.wxss": "css",
     "*.wxs": "javascript",
     "jy60.h": "c",
-    "ti_msp_dl_config.h": "c"
+    "ti_msp_dl_config.h": "c",
+    "control.h": "c"
   }
 }

@@ -8,7 +8,7 @@
 #define ENCODER_RESOLUTION 13 // 编码器线数
 
 /* 经过倍频之后的总分辨率 */
-#define ENCODER_TOTAL_RESOLUTION (ENCODER_RESOLUTION * 4) /* 4倍频后的总分辨率 - 修正为4倍频 */
+#define ENCODER_TOTAL_RESOLUTION (ENCODER_RESOLUTION * 2) /* 4倍频后的总分辨率 - 修正为4倍频 */
 
 /* 减速电机减速比 */
 #define REDUCTION_RATIO 20
@@ -34,8 +34,8 @@ extern long g_sigma_motor1pluse;     // 电机1累计脉冲
 extern long g_sigma_motor2pluse;     // 电机2累计脉冲
 extern short g_unittime_motor1pluse; // 电机1单位时间脉冲
 extern short g_unittime_motor2pluse; // 电机2单位时间脉冲
-extern double g_motor1_journey_cm;    // 电机1走过的路程
-extern double g_motor2_journey_cm;    // 电机2走过的路程
+extern double g_motor1_journey_cm;   // 电机1走过的路程
+extern double g_motor2_journey_cm;   // 电机2走过的路程
 
 extern uint8_t g_Line_Flag;         // 巡线标志位,0不巡线,1巡线
 extern uint8_t g_Stop_Flag;         // 停止标志位,0行驶,1停止
@@ -72,6 +72,4 @@ void car_go_line(int32_t distance_cm);
 extern uint8_t g_Gostraght;
 extern double spin90_cm;
 
-
 #endif
-

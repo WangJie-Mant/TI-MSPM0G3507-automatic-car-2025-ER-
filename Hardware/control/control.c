@@ -63,11 +63,10 @@ void TIMER_0_INST_IRQHandler(void)
   {
   case DL_TIMER_IIDX_ZERO:
   {
-    // 读取编码器脉冲计数并清零，添加原子操作保护
-    __disable_irq();
+    // // 读取编码器脉冲计数并清零，添加原子操作保护
+
     g_unittime_motor1pluse = read_encoder_left();
     g_unittime_motor2pluse = read_encoder_right();
-    __enable_irq();
 
     g_sigma_motor1pluse += g_unittime_motor1pluse;
     g_sigma_motor2pluse += g_unittime_motor2pluse;
@@ -235,15 +234,18 @@ void TIMER_0_INST_IRQHandler(void)
             // 转向完成后将标志位清零
           }
         }
+      
       }
-
-      DL_TimerA_clearInterruptStatus(TIMER_0_INST, DL_TIMERA_IIDX_ZERO);
+    DL_TimerA_clearInterruptStatus(TIMER_0_INST, DL_TIMERA_IIDX_ZERO);
+        break;
+    }
     }
   default:
     break;
-  }
+  
   }
 }
+// }
 
 void car_stop(void)
 {

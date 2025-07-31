@@ -6,35 +6,36 @@
 // 定义了两个编码器的计数器，用于计算编码器的旋转圈数
 volatile int _encoder_l_count = 0, _encoder_r_count = 0;
 int i = 0;
-static void encoder_function(void)
-{
-    // 处理左编码器A相中断,A相上升沿
-    // DL_GPIO_getEnabledInterruptStatus(ENCODER_PORT, ENCODER_Left_A_PIN)
-    volatile unsigned int interruptMask = ENCODER_PORT->CPU_INT.MIS;
-    volatile unsigned int state = ENCODER_PORT->DIN31_0;
-    volatile unsigned int clearMask = ENCODER_PORT->DIN31_0;
-    if (interruptMask & ENCODER_LEFT_A_PIN)
-    {
-        _encoder_l_count += (state & ENCODER_LEFT_B_PIN) ? -1 : 1;
-        clearMask |= ENCODER_LEFT_A_PIN;
-    }
+// static void encoder_function(void)
+// {
+//     // 处理左编码器A相中断,A相上升沿
+//     // DL_GPIO_getEnabledInterruptStatus(ENCODER_PORT, ENCODER_Left_A_PIN)
+//     volatile unsigned int interruptMask2 = ENCODER_RIGHT_A_PORT->CPU_INT.MIS;
+//     volatile unsigned int interruptMask1 = ENCODER_LEFT_A_PORT -> CPU_INT.MIS;
+//     volatile unsigned int state = ENCODER_PORT->DIN31_0;
+//     volatile unsigned int clearMask = ENCODER_PORT->DIN31_0;
+//     if (interruptMask & ENCODER_LEFT_A_PIN)
+//     {
+//         _encoder_l_count += (state & ENCODER_LEFT_B_PIN) ? -1 : 1;
+//         clearMask |= ENCODER_LEFT_A_PIN;
+//     }
 
-    if (interruptMask & ENCODER_RIGHT_A_PIN)
-    {
-        _encoder_r_count += (state & ENCODER_RIGHT_B_PIN) ? -1 : 1;
-        clearMask |= ENCODER_RIGHT_A_PIN;
-    }
+//     if (interruptMask & ENCODER_RIGHT_A_PIN)
+//     {
+//         _encoder_r_count += (state & ENCODER_RIGHT_B_PIN) ? -1 : 1;
+//         clearMask |= ENCODER_RIGHT_A_PIN;
+//     }
 
-    ENCODER_PORT->CPU_INT.ICLR |= clearMask;
-}
+//     ENCODER_PORT->CPU_INT.ICLR |= clearMask;
+// }
 
 // 处理中断，更新编码器计数
 static void encoder_function2(void)
 {
     // 处理左编码器A相中断,A相上升沿
-    if (DL_GPIO_getEnabledInterruptStatus(ENCODER_PORT, ENCODER_LEFT_A_PIN))
+    if (DL_GPIO_getEnabledInterruptStatus(ENCODER_LEFT_A_PORT, ENCODER_LEFT_A_PIN))
     {
-        if (DL_GPIO_readPins(ENCODER_PORT, ENCODER_LEFT_B_PIN) == 0) // B逻辑低
+        if (DL_GPIO_readPins(ENCODER_LEFT_B_PORT, ENCODER_LEFT_B_PIN) == 0) // B逻辑低
         {
 
             _encoder_l_count++; // 计数增
@@ -44,7 +45,7 @@ static void encoder_function2(void)
             _encoder_l_count--; // 计数减
         }
         // 清除A相的中断状态
-        DL_GPIO_clearInterruptStatus(ENCODER_PORT, ENCODER_LEFT_A_PIN);
+        DL_GPIO_clearInterruptStatus(ENCODER_LEFT_A_PORT, ENCODER_LEFT_A_PIN);
     }
 
     ////处理左编码器B相中断,B相下降沿
@@ -64,9 +65,9 @@ static void encoder_function2(void)
     //    }
 
     // 处理右编码器A相中断,A相上升沿
-    if (DL_GPIO_getEnabledInterruptStatus(ENCODER_PORT, ENCODER_RIGHT_A_PIN))
+    if (DL_GPIO_getEnabledInterruptStatus(ENCODER_RIGHT_A_PORT, ENCODER_RIGHT_A_PIN))
     {
-        if (DL_GPIO_readPins(ENCODER_PORT, ENCODER_RIGHT_B_PIN) == 0) // B逻辑低
+        if (DL_GPIO_readPins(ENCODER_RIGHT_B_PORT, ENCODER_RIGHT_B_PIN) == 0) // B逻辑低
         {
 
             _encoder_r_count++; // 计数增
@@ -76,7 +77,7 @@ static void encoder_function2(void)
             _encoder_r_count--; // 计数减
         }
         // 清除A相的中断状态
-        DL_GPIO_clearInterruptStatus(ENCODER_PORT, ENCODER_RIGHT_A_PIN);
+        DL_GPIO_clearInterruptStatus(ENCODER_RIGHT_A_PORT, ENCODER_RIGHT_A_PIN);
     }
 
     ////处理右编码器B相中断,B相下降沿

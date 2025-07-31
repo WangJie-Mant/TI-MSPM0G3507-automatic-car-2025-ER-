@@ -41,7 +41,6 @@
 #include "ti_msp_dl_config.h"
 
 DL_TimerA_backupConfig gTIMER_0Backup;
-DL_UART_Main_backupConfig gUART_WITBackup;
 
 /*
  *  ======== SYSCFG_DL_init ========
@@ -64,7 +63,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     /* Ensure backup structures have no valid state */
 
 	gTIMER_0Backup.backupRdy 	= false;
-	gUART_WITBackup.backupRdy 	= false;
+
 
 }
 /*
@@ -76,7 +75,6 @@ SYSCONFIG_WEAK bool SYSCFG_DL_saveConfiguration(void)
     bool retStatus = true;
 
 	retStatus &= DL_TimerA_saveConfiguration(TIMER_0_INST, &gTIMER_0Backup);
-	retStatus &= DL_UART_Main_saveConfiguration(UART_WIT_INST, &gUART_WITBackup);
 
     return retStatus;
 }
@@ -87,7 +85,6 @@ SYSCONFIG_WEAK bool SYSCFG_DL_restoreConfiguration(void)
     bool retStatus = true;
 
 	retStatus &= DL_TimerA_restoreConfiguration(TIMER_0_INST, &gTIMER_0Backup, false);
-	retStatus &= DL_UART_Main_restoreConfiguration(UART_WIT_INST, &gUART_WITBackup);
 
     return retStatus;
 }
@@ -219,16 +216,16 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 		MOTOR_BIN2_PIN |
 		OLED_SCL_PIN |
 		OLED_SDA_PIN);
+    DL_GPIO_setUpperPinsPolarity(GPIOA, DL_GPIO_PIN_28_EDGE_RISE);
+    DL_GPIO_clearInterruptStatus(GPIOA, ENCODER_LEFT_A_PIN);
+    DL_GPIO_enableInterrupt(GPIOA, ENCODER_LEFT_A_PIN);
     DL_GPIO_clearPins(GPIOB, LED_LED1_PIN);
     DL_GPIO_enableOutput(GPIOB, LED_LED1_PIN);
-    DL_GPIO_setLowerPinsPolarity(GPIOB, DL_GPIO_PIN_1_EDGE_RISE |
-		DL_GPIO_PIN_13_EDGE_FALL);
-    DL_GPIO_setUpperPinsPolarity(GPIOB, DL_GPIO_PIN_16_EDGE_RISE |
-		DL_GPIO_PIN_17_EDGE_FALL);
-    DL_GPIO_clearInterruptStatus(GPIOB, ENCODER_LEFT_A_PIN |
-		ENCODER_RIGHT_A_PIN);
-    DL_GPIO_enableInterrupt(GPIOB, ENCODER_LEFT_A_PIN |
-		ENCODER_RIGHT_A_PIN);
+    DL_GPIO_setLowerPinsPolarity(GPIOB, DL_GPIO_PIN_9_EDGE_RISE |
+		DL_GPIO_PIN_3_EDGE_FALL);
+    DL_GPIO_setUpperPinsPolarity(GPIOB, DL_GPIO_PIN_20_EDGE_FALL);
+    DL_GPIO_clearInterruptStatus(GPIOB, ENCODER_RIGHT_A_PIN);
+    DL_GPIO_enableInterrupt(GPIOB, ENCODER_RIGHT_A_PIN);
 
 }
 
@@ -432,10 +429,10 @@ SYSCONFIG_WEAK void SYSCFG_DL_UART_WIT_init(void)
     /*
      * Configure baud rate by setting oversampling and baud rate divisors.
      *  Target baud rate: 9600
-     *  Actual baud rate: 9600.1
+     *  Actual baud rate: 9599.81
      */
     DL_UART_Main_setOversampling(UART_WIT_INST, DL_UART_OVERSAMPLING_RATE_16X);
-    DL_UART_Main_setBaudRateDivisor(UART_WIT_INST, UART_WIT_IBRD_80_MHZ_9600_BAUD, UART_WIT_FBRD_80_MHZ_9600_BAUD);
+    DL_UART_Main_setBaudRateDivisor(UART_WIT_INST, UART_WIT_IBRD_40_MHZ_9600_BAUD, UART_WIT_FBRD_40_MHZ_9600_BAUD);
 
 
     /* Configure Interrupts */

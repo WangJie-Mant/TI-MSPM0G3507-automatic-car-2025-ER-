@@ -39,11 +39,18 @@ uint8_t g_oledstring[50];
 extern uint8_t g_usart2_receivedata;
 uint8_t g_mode = 0;
 int count = 0;
+int N = 0;
+int turn_num = 0; // 旋转次数
+uint8_t first_long;
 
 int main(void)
 {
+    //  AIN1_RESET;
+    //     AIN2_SET;
+    // BIN1_RESET;
+    //  BIN2_SET;
     SYSCFG_DL_init();
-
+     DL_TimerA_startCounter(PWM_MOTOR_INST);
     motor1_set_enable();
     motor2_set_enable();
 
@@ -63,49 +70,118 @@ int main(void)
     for (int i = 0; i < 100000; i++)
         ;
 
-    // 添加延时让OLED初始化完成
-    // for (volatile int i = 0; i < 100000; i++)
-    //     ;
-
     buzz_Init();
     NVIC_ClearPendingIRQ(TIMER_0_INST_INT_IRQN);
     NVIC_ClearPendingIRQ(UART1_INST_INT_IRQN);
     NVIC_ClearPendingIRQ(UART_WIT_INST_INT_IRQN);
-    NVIC_ClearPendingIRQ(ENCODER_INT_IRQN);
+    NVIC_ClearPendingIRQ(ENCODER_GPIOA_INT_IRQN);
+    NVIC_ClearPendingIRQ(ENCODER_GPIOB_INT_IRQN);
     NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
     NVIC_EnableIRQ(UART1_INST_INT_IRQN);
     NVIC_EnableIRQ(UART_WIT_INST_INT_IRQN);
-    NVIC_EnableIRQ(ENCODER_INT_IRQN);
+    NVIC_EnableIRQ(ENCODER_GPIOA_INT_IRQN);
+    NVIC_EnableIRQ(ENCODER_GPIOB_INT_IRQN);
 
     uint8_t key = 0;
     uint16_t target_angle = 0;
     uint8_t oledbuff[50];
 
-    /*test*/
-    // 设置电机1方向 - 正转
-    AIN1_SET;
-    AIN2_RESET;
-    // 设置电机2方向 - 正转
-    BIN1_SET;
-    BIN2_RESET;
-    
-    // 直接测试电机PWM输出
-    motor_load_pwm(3000, 3000);  // 给两个电机相同的PWM值
-    // car_go(120, 0);
+    // DL_GPIO_setPins(MOTOR_PORT, MOTOR_AIN1_PIN);
+    // DL_GPIO_clearPins(MOTOR_PORT, MOTOR_AIN2_PIN);
+
+    // DL_GPIO_setPins(MOTOR_PORT, MOTOR_BIN1_PIN);
+    // DL_GPIO_clearPins(MOTOR_PORT, MOTOR_BIN2_PIN);
+    // 电机测试配置 - 不要手动设置方向，让motor_load_pwm函数处理
+    motor_load_pwm(3000, 3000); // 正值：motor1正转，motor2正转
     OLED_Clear();
+
     while (1)
     {
-        // OLED_Clear();
-
         sprintf((char *)oledbuff, "motor1: %ld", g_sigma_motor1pluse);
-        OLED_ShowString(0, 16, oledbuff, 16, 1);
+        OLED_ShowString(0, 0, oledbuff, 16, 1);
         OLED_Refresh();
 
         sprintf((char *)oledbuff, "motor2: %ld", g_sigma_motor2pluse);
-        OLED_ShowString(0, 32, oledbuff, 16, 1);
+        OLED_ShowString(0, 16, oledbuff, 16, 1);
         OLED_Refresh();
 
+        // // 显示循迹传感器状态
+        // sprintf((char *)oledbuff, "Line:%d%d%d%d%d%d%d%d", HW1, HW2, HW3, HW4, HW5, HW6, HW7, HW8);
+        // OLED_ShowString(0, 32, oledbuff, 16, 1);
+        // OLED_Refresh();
+
+        // // 显示循迹误差
+        // sprintf((char *)oledbuff, "Err:%ld", line_err());
+        // OLED_ShowString(0, 48, oledbuff, 16, 1);
+        // OLED_Refresh();
+
         // OLED_ShowString(5, 5, (char*)oledbuff);
+
+        // 第一问
+        // if (g_Stop_Flag == 0 && count == 0)
+        // {
+        //     g_Stop_Flag = 1;
+        //     car_go_line(105);
+        //     first_long = g_motor1_journey_cm; // 记录第一次行驶的距离
+        // }
+        // if (g_Stop_Flag == 0 && count == 1)
+        // {
+        //     g_Stop_Flag = 1;
+        //     car_spin(left_90);
+        //     turn_num++;
+        // }
+        // if (g_Stop_Flag == 0 && count == 2)
+        // {
+        //     g_Stop_Flag = 1;
+        //     car_go_line(105);
+        // }
+        // if (g_Stop_Flag == 0 && count == 3)
+        // {
+        //     g_Stop_Flag = 1;
+        //     car_spin(left_90);
+        //     turn_num++;
+        // }
+        // if (g_Stop_Flag == 0 && count == 4)
+        // {
+        //     g_Stop_Flag = 1;
+        //     car_go_line(105);
+        // }
+        // if (g_Stop_Flag == 0 && count == 5)
+        // {
+        //     g_Stop_Flag = 1;
+        //     car_spin(left_90);
+        //     turn_num++;
+        // }
+        // if (g_Stop_Flag == 0 && count == 6)
+        // {
+        //     g_Stop_Flag = 1;
+        //     car_go_line(105);
+        // }
+        // if (g_Stop_Flag == 0 && count == 7)
+        // {
+        //     g_Stop_Flag = 1;
+        //     car_spin(left_90);
+        //     turn_num++;
+        // }
+        // if (g_Stop_Flag == 0 && count == 8)
+        // {
+        //     if (4 * N != turn_num)
+        //     {
+        //         count = 1; // 重置计
+        //         g_Stop_Flag = 1;
+        //         car_go_line(105);
+        //         turn_num++;
+        //     }
+        //     else
+        //     {
+        //         g_Stop_Flag = 1;
+        //         car_go_line(105 - first_long);
+        //     }
+        // }
+        // 第二问
+        // 第三问
+
+        // 如果旋转次数小于4次，继续执行
 
         // if(g_Stop_Flag==0&&count==0){
         //    Buzz(10000);
