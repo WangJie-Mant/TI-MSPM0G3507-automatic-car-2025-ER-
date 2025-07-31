@@ -27,11 +27,7 @@ int32_t yaw_err0(void);
 int32_t yaw_err180(void);
 int detect_line(void);
 
-// 新增的STM32工程函数声明
+// 基础功能函数声明
 int8_t is_line_detected(void);
-int8_t is_on_straight_pattern(void);
-int8_t is_line_lost(void);
-int get_search_status(void);
-int8_t is_completely_off_track(void);
 
 #endif

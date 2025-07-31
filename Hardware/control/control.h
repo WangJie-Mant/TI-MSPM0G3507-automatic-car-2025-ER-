@@ -70,12 +70,7 @@ void line_speed_control(void);
 void car_spin_degree(double angle);
 void car_go_line(int32_t distance_cm);
 
-/* 从STM32工程移植的脱轨恢复函数 */
-double calculate_target_yaw(void);
-void handle_off_track_recovery(void);
-
 extern uint8_t g_Gostraght;
-extern uint8_t g_OffTrack_Flag; // 脱轨恢复标志位
 extern double spin90_cm;
 
 #endif
