@@ -194,13 +194,12 @@ extern "C" {
 /* Defines for BIN2: GPIOA.15 with pinCMx 37 on package pin 8 */
 #define MOTOR_BIN2_PIN                                          (DL_GPIO_PIN_15)
 #define MOTOR_BIN2_IOMUX                                         (IOMUX_PINCM37)
-/* Port definition for Pin Group KEY */
-#define KEY_PORT                                                         (GPIOB)
-
-/* Defines for KEY1: GPIOB.21 with pinCMx 49 on package pin 20 */
-#define KEY_KEY1_PIN                                            (DL_GPIO_PIN_21)
-#define KEY_KEY1_IOMUX                                           (IOMUX_PINCM49)
+/* Defines for KEY1: GPIOA.2 with pinCMx 7 on package pin 42 */
+#define KEY_KEY1_PORT                                                    (GPIOA)
+#define KEY_KEY1_PIN                                             (DL_GPIO_PIN_2)
+#define KEY_KEY1_IOMUX                                            (IOMUX_PINCM7)
 /* Defines for KEY2: GPIOB.7 with pinCMx 24 on package pin 59 */
+#define KEY_KEY2_PORT                                                    (GPIOB)
 #define KEY_KEY2_PIN                                             (DL_GPIO_PIN_7)
 #define KEY_KEY2_IOMUX                                           (IOMUX_PINCM24)
 /* Defines for INF1: GPIOB.8 with pinCMx 25 on package pin 60 */

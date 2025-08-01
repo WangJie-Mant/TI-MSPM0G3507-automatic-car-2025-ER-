@@ -88,7 +88,8 @@ main.o: ../main.c ../main.h \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/buzz/buzz.h \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/key/key.h \
  C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/menu/menu.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/task/task.h
+ C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/task/task.h \
+ C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/oled/simple_oled.h
 ../main.h:
 ti_msp_dl_config.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/devices/msp/msp.h:
@@ -178,3 +179,4 @@ C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/buzz/buzz.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/key/key.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/menu/menu.h:
 C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/task/task.h:
+C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/oled/simple_oled.h:

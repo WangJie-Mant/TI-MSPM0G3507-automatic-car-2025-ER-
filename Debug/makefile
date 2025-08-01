@@ -22,7 +22,9 @@ ORDERED_OBJS += \
 "./Hardware/line/line.o" \
 "./Hardware/menu/menu.o" \
 "./Hardware/motor/motor.o" \
+"./Hardware/oled/mini_font.o" \
 "./Hardware/oled/oled.o" \
+"./Hardware/oled/simple_oled.o" \
 "./Hardware/pid/pid.o" \
 "./Hardware/pid/smooth.o" \
 "./Hardware/task/task.o" \
@@ -197,8 +199,8 @@ CAR-V2.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(GEN_MISC_FILES__QUOTED)$(BIN_OUTPUTS__QUOTED)$(GEN_FILES__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "ti_msp_dl_config.o" "startup_mspm0g350x_ticlang.o" "main.o" "Hardware\buzz\buzz.o" "Hardware\control\control.o" "Hardware\delay\delay.o" "Hardware\encoder\encoder.o" "Hardware\jy60\jy60.o" "Hardware\key\key.o" "Hardware\line\line.o" "Hardware\menu\menu.o" "Hardware\motor\motor.o" "Hardware\oled\oled.o" "Hardware\pid\pid.o" "Hardware\pid\smooth.o" "Hardware\task\task.o" "Hardware\uart\uart.o" "Hardware\uart\uart_jy60.o" 
-	-$(RM) "ti_msp_dl_config.d" "startup_mspm0g350x_ticlang.d" "main.d" "Hardware\buzz\buzz.d" "Hardware\control\control.d" "Hardware\delay\delay.d" "Hardware\encoder\encoder.d" "Hardware\jy60\jy60.d" "Hardware\key\key.d" "Hardware\line\line.d" "Hardware\menu\menu.d" "Hardware\motor\motor.d" "Hardware\oled\oled.d" "Hardware\pid\pid.d" "Hardware\pid\smooth.d" "Hardware\task\task.d" "Hardware\uart\uart.d" "Hardware\uart\uart_jy60.d" 
+	-$(RM) "ti_msp_dl_config.o" "startup_mspm0g350x_ticlang.o" "main.o" "Hardware\buzz\buzz.o" "Hardware\control\control.o" "Hardware\delay\delay.o" "Hardware\encoder\encoder.o" "Hardware\jy60\jy60.o" "Hardware\key\key.o" "Hardware\line\line.o" "Hardware\menu\menu.o" "Hardware\motor\motor.o" "Hardware\oled\mini_font.o" "Hardware\oled\oled.o" "Hardware\oled\simple_oled.o" "Hardware\pid\pid.o" "Hardware\pid\smooth.o" "Hardware\task\task.o" "Hardware\uart\uart.o" "Hardware\uart\uart_jy60.o" 
+	-$(RM) "ti_msp_dl_config.d" "startup_mspm0g350x_ticlang.d" "main.d" "Hardware\buzz\buzz.d" "Hardware\control\control.d" "Hardware\delay\delay.d" "Hardware\encoder\encoder.d" "Hardware\jy60\jy60.d" "Hardware\key\key.d" "Hardware\line\line.d" "Hardware\menu\menu.d" "Hardware\motor\motor.d" "Hardware\oled\mini_font.d" "Hardware\oled\oled.d" "Hardware\oled\simple_oled.d" "Hardware\pid\pid.d" "Hardware\pid\smooth.d" "Hardware\task\task.d" "Hardware\uart\uart.d" "Hardware\uart\uart_jy60.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

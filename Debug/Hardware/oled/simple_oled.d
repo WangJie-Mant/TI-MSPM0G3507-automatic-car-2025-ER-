@@ -1,6 +1,7 @@
 # FIXED
 
-Hardware/menu/menu.o: ../Hardware/menu/menu.c ../Hardware/menu/menu.h \
+Hardware/oled/simple_oled.o: ../Hardware/oled/simple_oled.c \
+ ../Hardware/oled/simple_oled.h ../Hardware/oled/oled.h \
  ti_msp_dl_config.h \
  C:/ti/mspm0_sdk_2_05_00_05/source/ti/devices/msp/msp.h \
  C:/ti/mspm0_sdk_2_05_00_05/source/ti/devices/DeviceFamily.h \
@@ -74,23 +75,9 @@ Hardware/menu/menu.o: ../Hardware/menu/menu.c ../Hardware/menu/menu.h \
  C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/dl_vref.h \
  C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/dl_wwdt.h \
  C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/m0p/dl_interrupt.h \
- C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/m0p/dl_systick.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/main.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/control/control.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/delay/delay.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/encoder/encoder.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/jy60/jy60.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/line/line.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/motor/motor.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/oled/oled.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/pid/pid.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/uart/uart.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/buzz/buzz.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/key/key.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/menu/menu.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/task/task.h \
- C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/oled/simple_oled.h
-../Hardware/menu/menu.h:
+ C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/m0p/dl_systick.h
+../Hardware/oled/simple_oled.h:
+../Hardware/oled/oled.h:
 ti_msp_dl_config.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/devices/msp/msp.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/devices/DeviceFamily.h:
@@ -165,18 +152,3 @@ C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/dl_vref.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/dl_wwdt.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/m0p/dl_interrupt.h:
 C:/ti/mspm0_sdk_2_05_00_05/source/ti/driverlib/m0p/dl_systick.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/main.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/control/control.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/delay/delay.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/encoder/encoder.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/jy60/jy60.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/line/line.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/motor/motor.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/oled/oled.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/pid/pid.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/uart/uart.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/buzz/buzz.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/key/key.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/menu/menu.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/task/task.h:
-C:/Users/Walnut/workspace_ccstheia/CAR-V2/Hardware/oled/simple_oled.h:
