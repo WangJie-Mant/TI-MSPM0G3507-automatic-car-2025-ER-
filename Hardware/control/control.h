@@ -8,7 +8,7 @@
 #define ENCODER_RESOLUTION 13 // 编码器线数
 
 /* 经过倍频之后的总分辨率 */
-#define ENCODER_TOTAL_RESOLUTION (ENCODER_RESOLUTION) /* 4倍频后的总分辨率 - 修正为4倍频 */
+#define ENCODER_TOTAL_RESOLUTION (ENCODER_RESOLUTION * 2) /* 4倍频后的总分辨率 - 修正为真正的4倍频 */
 
 /* 减速电机减速比 */
 #define REDUCTION_RATIO 20
@@ -17,7 +17,7 @@
 #define SPEED_PID_PERIOD 20 // 这个要看定时器3的中断周期
 
 /* 小车速度限制 */
-#define TARGET_SPEED_MAX 3000 // 单位rpm,进一步提高以获得更大的基础速度
+#define TARGET_SPEED_MAX 3500 // 单位rpm,适度降低速度以减少惯性超调
 
 /* 轮胎直径cm */
 #define WHEEL_D 4.75 // 单位cm,实际测量为准

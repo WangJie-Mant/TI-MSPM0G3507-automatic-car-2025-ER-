@@ -5,10 +5,9 @@
 #include "ti_msp_dl_config.h"
 #include <stdint.h>
 
-// PID参数 - 优化后的参数
-#define LINE_KP 2.8f // 适度降低P值，减少抽搐
-#define LINE_KI 0.02f // 保持无积分，避免累积误差
-#define LINE_KD 0.1f // 加入少量微分，抑制震荡
+#define LINE_KP 4.0f
+#define LINE_KI 0.03f
+#define LINE_KD 0.15f
 
 // 传感器宏定义保持原有
 #define HW1 (DL_GPIO_readPins(INF_INF1_PORT, INF_INF1_PIN) > 0 ? 1 : 0)

@@ -9,22 +9,22 @@
 
 // 电机1使用参数
 /*位置环相关参数*/
-#define MOTOR1_LOC_KP 3.0  // 进一步提高位置环P参数，增强基础速度
-#define MOTOR1_LOC_KI 0.02 // 适当增加积分项
+#define MOTOR1_LOC_KP 5.0
+#define MOTOR1_LOC_KI 0.05
 #define MOTOR1_LOC_KD 0.0
 /*速度环相关参数*/
-#define MOTOR1_SPD_KP 12.0 // 进一步提高P参数，增大驱动力
-#define MOTOR1_SPD_KI 1.0  // 提高I参数，增强低速驱动能力
+#define MOTOR1_SPD_KP 15.0
+#define MOTOR1_SPD_KI 1.5
 #define MOTOR1_SPD_KD 0.0
 
 // 电机2使用参数
 /*位置环相关参数*/
-#define MOTOR2_LOC_KP 3.0  // 保持与motor1一致
-#define MOTOR2_LOC_KI 0.02 // 保持与motor1一致
+#define MOTOR2_LOC_KP 5.0
+#define MOTOR2_LOC_KI 0.05
 #define MOTOR2_LOC_KD 0.0
 /*速度环相关参数*/
-#define MOTOR2_SPD_KP 12.0 // 保持与motor1一致
-#define MOTOR2_SPD_KI 1.0  // 保持与motor1一致
+#define MOTOR2_SPD_KP 15.0
+#define MOTOR2_SPD_KI 1.5
 #define MOTOR2_SPD_KD 0.0
 
 // 角度环相关参数

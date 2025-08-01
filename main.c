@@ -55,6 +55,7 @@ int main(void)
     motor2_set_enable();
     line_init();
 
+    OLED_Init();
     pid_Init(&g_pid_speed1, MOTOR1_SPD_KP, MOTOR1_SPD_KI, MOTOR1_SPD_KD, 0, 0, 0,
              0);
     pid_Init(&g_pid_speed2, MOTOR2_SPD_KP, MOTOR2_SPD_KI, MOTOR2_SPD_KD, 0, 0, 0,
@@ -70,7 +71,7 @@ int main(void)
     // 设置正方形轨迹巡线圈数 (可以根据需要修改)
     circle_num = 1; // 默认走1圈正方形
 
-    OLED_Init();
+    // OLED_Init();
 
     for (int i = 0; i < 100000; i++)
         ;
@@ -102,28 +103,28 @@ int main(void)
     OLED_Clear();
 
     // 测试STM32移植的巡线功能
-    car_go_line(50); // 巡线前进50cm来测试位置环
-    // car_spin(left_90); // 测试左转90度
+   car_go_line(105); // 巡线前进50cm来测试位置环
+    //  car_spin(left_90); // 测试左转90度
     //  car_spin_degree(90);
     //  car_go(100, 0);
 
     while (1)
     {
         sprintf((char *)oledbuff, "line: %d%d%d%d%d%d%d%d", HW1, HW2, HW3, HW4, HW5, HW6, HW7, HW8);
-        OLED_ShowString(0, 0, (char *)oledbuff, 16, 1);
+        OLED_ShowString(0, 0, oledbuff, 16, 1);
         OLED_Refresh();
 
         sprintf((char *)oledbuff, "err: %ld", g_line_num);
-        OLED_ShowString(0, 16, (char *)oledbuff, 16, 1);
+        OLED_ShowString(0, 16, oledbuff, 16, 1);
         OLED_Refresh();
 
         // 显示位置环目标和当前值，用于调试位置环
         sprintf((char *)oledbuff, "tgt:%.0f act:%ld", g_pid_location1.target, g_sigma_motor1pluse);
-        OLED_ShowString(0, 32, (char *)oledbuff, 16, 1);
+        OLED_ShowString(0, 32, oledbuff, 16, 1);
         OLED_Refresh();
 
         sprintf((char *)oledbuff, "m1:%.2f m2:%.2f", g_motor1_journey_cm, g_motor2_journey_cm);
-        OLED_ShowString(0, 48, (char *)oledbuff, 16, 1);
+        OLED_ShowString(0, 48, oledbuff, 16, 1);
         OLED_Refresh();
 
         // sprintf((char *)oledbuff, "SPD1:%.0f SPD2:%.0f", g_speed1_outval, g_speed2_outval);
