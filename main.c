@@ -103,7 +103,7 @@ int main(void)
     OLED_Clear();
 
     // 测试STM32移植的巡线功能
-   car_go_line(105); // 巡线前进50cm来测试位置环
+   car_go_line(100); // 巡线前进50cm来测试位置环
     //  car_spin(left_90); // 测试左转90度
     //  car_spin_degree(90);
     //  car_go(100, 0);
@@ -114,7 +114,7 @@ int main(void)
         OLED_ShowString(0, 0, oledbuff, 16, 1);
         OLED_Refresh();
 
-        sprintf((char *)oledbuff, "err: %ld", g_line_num);
+        sprintf((char *)oledbuff, "err: %d", g_line_num);
         OLED_ShowString(0, 16, oledbuff, 16, 1);
         OLED_Refresh();
 

@@ -58,6 +58,8 @@ double spin90_cm = 0;
 int count2 = 0;
 int count3 = 0;
 
+
+
 void TIMER_0_INST_IRQHandler(void)
 {
   /*20ms周期的定时器中断，pid控制等等在此处进行*/
@@ -82,8 +84,10 @@ void TIMER_0_INST_IRQHandler(void)
 
     if (g_Line_Flag == 1)
     {
-      if ((fabs(g_sigma_motor1pluse) >= fabs(g_pid_location1.target) - 10) &&
-               (fabs(g_sigma_motor2pluse) >= fabs(g_pid_location2.target) - 10))
+      uint8_t is_reached = ((labs(g_sigma_motor1pluse) >= labs(g_pid_location1.target) - 10) &&
+               (labs(g_sigma_motor2pluse) >= labs(g_pid_location2.target) - 10));
+      uint8_t is_detected = detect_line();
+      if (is_reached || is_detected)
       {
         g_Line_Flag = 0;     // 停止循迹
         g_Stop_Flag = 0;     // 清除停止标志，为下一个动作做准备

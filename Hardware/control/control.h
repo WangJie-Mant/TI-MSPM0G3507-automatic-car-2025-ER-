@@ -73,5 +73,7 @@ void car_go_line(int32_t distance_cm);
 
 extern uint8_t g_Gostraght;
 extern double spin90_cm;
+extern uint8_t is_reached;
+extern uint8_t is_detected;
 
 #endif
